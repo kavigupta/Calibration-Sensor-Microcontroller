@@ -76,3 +76,16 @@ Vector vector_cross(Vector u, Vector v) {
 void vector_print(Vector v) {
 	printf("(%f, %f, %f)", v.x, v.y, v.z);
 }
+
+PolarVector vector_toPolar(Vector v) {
+	PolarVector pv = { .r = vector_mag(v), .theta = atan2(
+			sqrt(v.x * v.x + v.y * v.y), v.z), .phi = atan2(v.y, v.x) };
+	return pv;
+}
+Vector vector_toCartesian(PolarVector v) {
+	double sintheta = sin(v.theta);
+	Vector cv = { .x = v.r * sintheta * cos(v.phi), .y = v.r * sintheta
+			* sin(v.phi), .z = v.r * cos(v.theta) };
+	return cv;
+}
+

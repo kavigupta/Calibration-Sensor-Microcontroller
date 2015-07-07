@@ -5,6 +5,10 @@ typedef struct {
 	const double x, y, z;
 } Vector;
 
+typedef struct{
+	const double r, theta, phi;
+} PolarVector;
+
 extern const Vector VECTOR_UNIT_X;
 extern const Vector VECTOR_UNIT_Y;
 extern const Vector VECTOR_UNIT_Z;
@@ -21,4 +25,7 @@ Vector vector_unit(Vector v);
 
 double vector_dot(Vector u, Vector v);
 Vector vector_cross(Vector u, Vector v);
+
+PolarVector vector_toPolar(Vector v);
+Vector vector_toCartesian(PolarVector v);
 #endif

@@ -6,13 +6,16 @@
  */
 
 #include <assert.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 
+#include "Analysis.h"
 #include "Controller.h"
 #include "IO.h"
 #include "Matrix.h"
 #include "Vector.h"
+
 
 void printEquality(Vector a, Vector b) {
 	vector_print(a);
@@ -24,8 +27,8 @@ void printEquality(Vector a, Vector b) {
 void testMatrix() {
 	Matrix test0 = { .v11 = 1, .v12 = 2, .v13 = 3, .v21 = 4, .v22 = 5, .v23 = 6,
 			.v31 = 7, .v32 = 8, .v33 = 9 };
-	Matrix test5 = { .v11 = 123.1, .v12 = 2, .v13 = 3, .v21 = 4, .v22 = 5, .v23 = 6,
-			.v31 = 7, .v32 = 8, .v33 = 9 };
+	Matrix test5 = { .v11 = 123.1, .v12 = 2, .v13 = 3, .v21 = 4, .v22 = 5,
+			.v23 = 6, .v31 = 7, .v32 = 8, .v33 = 9 };
 	Matrix test1 = { .v11 = 30, .v12 = 36, .v13 = 42, .v21 = 66, .v22 = 81,
 			.v23 = 96, .v31 = 102, .v32 = 126, .v33 = 150 };
 	Vector test2 = { .x = 23.5, .y = -23.4, .z = 2.3 };
@@ -48,8 +51,7 @@ void testMatrix() {
 	printf("Tests Passed!\n");
 }
 
-int main() {
-	testMatrix();
+void test45dgup() {
 	DataSet calibration =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
@@ -68,5 +70,29 @@ int main() {
 	Vector displacement = orientation(Theta(mag45));
 	vector_print(displacement);
 	printf("\n%f\n", vector_mag(displacement));
+}
+
+int main() {
+	DataSet calibration =
+			read(
+					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration-kavi070701.csv");
+	calibrate(calibration);
+	DataSet magnetometer =
+			read(
+					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/magnetometer-kavi070701.csv");
+	TimePolarVector* polars = magnetometerData(magnetometer);
+	FILE* f =
+			fopen(
+					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/polar-cooordinates-kavi070701.csv",
+					"w");
+	fprintf(f, "Time\tTheta\tPhi\n");
+	int i;
+	for (i = 0; polars[i].t >= 0; i++) {
+		fprintf(f, "%f\t%f\t%f\n", polars[i].t,
+				polars[i].pos.theta * 180 / 3.14159,
+				polars[i].pos.phi * 180 / 3.14159);
+	}
+	fclose(f);
 	return 0;
 }
+

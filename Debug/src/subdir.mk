@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/Analysis.c \
 ../src/Controller.c \
 ../src/IO.c \
 ../src/Matrix.c \
@@ -11,6 +12,7 @@ C_SRCS += \
 ../src/Vector.c 
 
 OBJS += \
+./src/Analysis.o \
 ./src/Controller.o \
 ./src/IO.o \
 ./src/Matrix.o \
@@ -18,6 +20,7 @@ OBJS += \
 ./src/Vector.o 
 
 C_DEPS += \
+./src/Analysis.d \
 ./src/Controller.d \
 ./src/IO.d \
 ./src/Matrix.d \

@@ -40,26 +40,26 @@ RawDataSet read(char* path) {
 }
 RawData readLine(FILE* file) {
 	double t, magx, magy, magz, gyrx, gyry, gyrz, aclx, acly, aclz;
-	int code = fscanf(file, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf",
-			&t, &magx, &magy, &magz, &gyrx, &gyry, &gyrz, &aclx, &acly, &aclz);
+	int code = fscanf(file, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", &t,
+			&magx, &magy, &magz, &gyrx, &gyry, &gyrz, &aclx, &acly, &aclz);
 	if (code != 10) {
 		RawData data = { .t = -1 };
 		return data;
 	}
-	RawData data = { .t = t, .mag = { .x = magx, .y = magy, .z = magz }, .gyr = {
-			.x = gyrx, .y = gyry, .z = gyrz }, .acl = { .x = aclx, .y = acly,
+	RawData data = { .t = t, .mag = { .x = magx, .y = magy, .z = magz }, .gyr =
+			{ .x = gyrx, .y = gyry, .z = gyrz }, .acl = { .x = aclx, .y = acly,
 			.z = aclz } };
 	return data;
 }
 void writeLine(FILE* file, RawData entry) {
-	fprintf(file, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", entry.t,
+	fprintf(file, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", entry.t,
 			entry.mag.x, entry.mag.y, entry.mag.z, entry.gyr.x, entry.gyr.y,
 			entry.gyr.z, entry.acl.x, entry.acl.y, entry.acl.z);
 }
 void write(char* path, RawDataSet data) {
 	int i;
 	FILE* file = fopen(path, "w");
-	fprintf(file, "Time\tMagX\tMagY\tMagZ\tGyrX\tGyrY\tGyrZ\tAclX\tAclY\tAclZ");
+	fprintf(file, "Time,mx,my,mz,gx,gy,gz,aclx,acly,aclz");
 	for (i = 0; i < data.len; i++) {
 		writeLine(file, data.values[i]);
 	}

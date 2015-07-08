@@ -9,7 +9,7 @@
 #include "Vector.h"
 #include <string.h>
 
-void calibrate(DataSet data) {
+void calibrate(RawDataSet data) {
 	int i;
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;

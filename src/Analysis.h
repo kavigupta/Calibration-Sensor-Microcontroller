@@ -16,6 +16,6 @@ typedef struct {
 	double t;
 } TimePolarVector;
 
-TimePolarVector* magnetometerData(DataSet data);
+TimePolarVector* magnetometerData(RawDataSet data);
 
 #endif /* ANALYSIS_H_ */

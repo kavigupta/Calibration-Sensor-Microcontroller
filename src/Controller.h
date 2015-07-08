@@ -17,7 +17,7 @@ Matrix THETA_CALIBRATION;
 extern Vector G_CALIBRATION;
 Vector G_CALIBRATION;
 
-void calibrate(DataSet data);
+void calibrate(RawDataSet data);
 Matrix Theta(Vector mag);
 Vector orientation(Matrix Theta);
 Vector normalized_accel(Matrix Theta, Vector unnormalized_accel);

@@ -13,7 +13,7 @@
 
 #include "Controller.h"
 
-TimePolarVector* magnetometerData(DataSet data) {
+TimePolarVector* magnetometerData(RawDataSet data) {
 	TimePolarVector * polars = malloc((data.len + 1) * sizeof(TimePolarVector));
 	int i = 0;
 	for (i = 0; i < data.len; i++) {

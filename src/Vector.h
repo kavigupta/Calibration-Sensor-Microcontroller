@@ -5,7 +5,12 @@ typedef struct {
 	const double x, y, z;
 } Vector;
 
-typedef struct{
+typedef struct {
+	Vector v;
+	const double t;
+} Vector4;
+
+typedef struct {
 	const double r, theta, phi;
 } PolarVector;
 

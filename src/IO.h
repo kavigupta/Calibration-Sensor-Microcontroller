@@ -7,28 +7,15 @@
 
 #include <stdio.h>
 
-#include "Vector.h"
+#include "DataSet.h"
 
 #ifndef _IO_H
 #define _IO_H
 
-typedef struct {
-	double t;
-	Vector acl, gyr, mag;
-} Data;
 
-typedef struct {
-	int len;
-	Data* values;
-} DataSet;
-
-DataSet read(char* path);
-Data readLine(FILE* file);
-void writeLine(FILE* file, Data entry);
-void write(char* path, DataSet data);
-
-Vector averageAcl(DataSet data);
-Vector averageMag(DataSet data);
-Vector averageGyr(DataSet data);
+RawDataSet read(char* path);
+RawData readLine(FILE* file);
+void writeLine(FILE* file, RawData entry);
+void write(char* path, RawDataSet data);
 
 #endif /*_IO_H*/

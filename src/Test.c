@@ -52,10 +52,10 @@ void testMatrix() {
 }
 
 void test45dgup() {
-	DataSet calibration =
+	RawDataSet calibration =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
-	DataSet dgup45 =
+	RawDataSet dgup45 =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/45dgup.csv");
 	calibrate(calibration);
@@ -73,11 +73,11 @@ void test45dgup() {
 }
 
 int main() {
-	DataSet calibration =
+	RawDataSet calibration =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration-kavi070701.csv");
 	calibrate(calibration);
-	DataSet magnetometer =
+	RawDataSet magnetometer =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/magnetometer-kavi070701.csv");
 	TimePolarVector* polars = magnetometerData(magnetometer);

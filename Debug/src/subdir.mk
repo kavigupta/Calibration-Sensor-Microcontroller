@@ -6,6 +6,7 @@
 C_SRCS += \
 ../src/Analysis.c \
 ../src/Controller.c \
+../src/DataSet.c \
 ../src/IO.c \
 ../src/Matrix.c \
 ../src/Test.c \
@@ -14,6 +15,7 @@ C_SRCS += \
 OBJS += \
 ./src/Analysis.o \
 ./src/Controller.o \
+./src/DataSet.o \
 ./src/IO.o \
 ./src/Matrix.o \
 ./src/Test.o \
@@ -22,6 +24,7 @@ OBJS += \
 C_DEPS += \
 ./src/Analysis.d \
 ./src/Controller.d \
+./src/DataSet.d \
 ./src/IO.d \
 ./src/Matrix.d \
 ./src/Test.d \

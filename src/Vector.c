@@ -8,7 +8,7 @@
 #include "Vector.h"
 
 #include <math.h>
-#include <stdlib.h>
+#include <stdio.h>
 
 const Vector VECTOR_UNIT_X = { .x = 1 };
 const Vector VECTOR_UNIT_Y = { .y = 1 };

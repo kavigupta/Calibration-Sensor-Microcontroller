@@ -35,7 +35,7 @@ Magnetometer\ Processor: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) "Magnetometer Processor"
+	-$(RM) $(OBJS)$(C_DEPS)$(EXECUTABLES) "Magnetometer Processor"
 	-@echo ' '
 
 .PHONY: all clean dependents

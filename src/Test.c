@@ -54,10 +54,10 @@ void testMatrix() {
 void test45dgup() {
 	RawDataSet calibration =
 			read(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
+					"/home/harveylu/workspace/summer/Calibration-Sensor-Microcontroller/calibration.csv");
 	RawDataSet dgup45 =
 			read(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/45dgup.csv");
+					"/home/harveylu/workspace/summer/Calibration-Sensor-Microcontroller/45dgup.csv");
 	calibrate(calibration);
 	Vector calib = averageMag(calibration);
 	Vector mag45 = averageMag(dgup45);
@@ -75,15 +75,15 @@ void test45dgup() {
 int main() {
 	RawDataSet calibration =
 			read(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration-kavi070701.csv");
+					"/home/harveylu/workspace/summer/Calibration-Sensor-Microcontroller/calibration-kavi070701.csv");
 	calibrate(calibration);
 	RawDataSet magnetometer =
 			read(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/magnetometer-kavi070701.csv");
+					"/home/harveylu/workspace/summer/Calibration-Sensor-Microcontroller/test1-mag.csv");
 	TimePolarVector* polars = magnetometerData(magnetometer);
 	FILE* f =
 			fopen(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/polar-cooordinates-kavi070701.csv",
+					"/home/harveylu/Desktop/polar-cooordinates-test1.csv",
 					"w");
 	fprintf(f, "Time\tTheta\tPhi\n");
 	int i;

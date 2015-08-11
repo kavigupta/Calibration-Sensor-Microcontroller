@@ -108,3 +108,21 @@ int offsetOf(CalibratedColumn column) {
 	}
 	return -1;
 }
+
+void peakset_add(PeakSet* peaks, Peak peak) {
+	if (peaks->size == peaks->capacity)
+		peakset_grow(peaks);
+	peaks->values[peaks->size] = peak;
+	peaks->size++;
+}
+
+void peakset_grow(PeakSet* peaks) {
+	peaks->capacity = peaks->capacity * 3 / 2;
+	peaks->values = realloc(peaks->values, peaks->capacity);
+}
+
+PeakSet peakset_new() {
+	PeakSet ps = { .values = malloc(sizeof(Peak) * 10), .capacity = 10, .size =
+			0 };
+	return ps;
+}

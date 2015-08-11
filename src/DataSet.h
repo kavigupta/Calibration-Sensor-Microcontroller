@@ -46,9 +46,9 @@ typedef struct {
 } Peak;
 
 typedef struct {
-	int len, capacity;
+	int size, capacity;
 	Peak* values;
-};
+} PeakSet;
 
 #define GET_OFFSET(STRUCT, FIELD, FIELD_TYPE, SUBFIELD) \
 	((int)offsetof(STRUCT, FIELD) + (int)offsetof(FIELD_TYPE, SUBFIELD))
@@ -65,5 +65,9 @@ Vector averageGyr(JoinedDataSet data);
  * Returns the offset within the CalibratedData struct of the given column
  */
 int offsetOf(CalibratedColumn column);
+void peakset_add(PeakSet* peaks, Peak peak);
+void peakset_grow(PeakSet* peaks);
+PeakSet peakset_new();
+
 
 #endif /* DATASET_H_ */

@@ -12,14 +12,15 @@
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
-JoinedDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gyrl, Vector4* acl,
-		int acll, double dt) {
+JoinedDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gyrl,
+		Vector4* acl, int acll, double dt) {
 	int im = 0, ig = 0, ia = 0;
 	int size = 0, capacity = 10;
 	JoinedData* set = malloc(capacity * sizeof(JoinedData));
 	while ((im < magl) && (ig < gyrl) && (ia < acll)) {
-		JoinedData next = { .mag = mag[im].v, .gyr = gyr[ig].v, .acl = acl[ia].v, .t =
-				MIN(MIN(mag[im].t, gyr[ig].t), acl[ia].t) };
+		JoinedData next =
+				{ .mag = mag[im].v, .gyr = gyr[ig].v, .acl = acl[ia].v, .t =
+						MIN(MIN(mag[im].t, gyr[ig].t), acl[ia].t) };
 		memcpy(&(set[size]), &next, sizeof(JoinedData));
 		size++;
 		if (size == capacity) {
@@ -82,4 +83,28 @@ Vector averageGyr(JoinedDataSet data) {
 	}
 	Vector avg = { .x = x / tsum, .y = y / tsum, .z = z / tsum };
 	return avg;
+}
+
+int offsetOf(CalibratedColumn column) {
+	switch (column) {
+		case ACL_X:
+			return GET_CALIDATE_OFF(acl, x);
+		case ACL_Y:
+			return GET_CALIDATE_OFF(acl, y);
+		case ACL_Z:
+			return GET_CALIDATE_OFF(acl, z);
+		case GYR_X:
+			return GET_CALIDATE_OFF(gyr, x);
+		case GYR_Y:
+			return GET_CALIDATE_OFF(gyr, y);
+		case GYR_Z:
+			return GET_CALIDATE_OFF(gyr, z);
+		case MAG_PHI:
+			return GET_OFFSET(CalibratedData, mag, PolarVector, phi);
+		case MAG_THETA:
+			return GET_OFFSET(CalibratedData, mag, PolarVector, theta);
+		case MAG_R:
+			return GET_OFFSET(CalibratedData, mag, PolarVector, r);
+	}
+	return -1;
 }

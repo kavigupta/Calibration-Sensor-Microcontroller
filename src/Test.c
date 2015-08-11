@@ -93,6 +93,7 @@ int main() {
 				calibrated.values[i].mag.phi * 180 / 3.14159);
 	}
 	fclose(f);
+	printf("Completed Successfully");
 	return 0;
 }
 

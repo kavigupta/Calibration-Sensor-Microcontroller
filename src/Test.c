@@ -8,14 +8,13 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
-#include <string.h>
 
-#include "Analysis.h"
 #include "Controller.h"
+#include "DataSet.h"
+#include "Analysis.h"
 #include "IO.h"
 #include "Matrix.h"
 #include "Vector.h"
-
 
 void printEquality(Vector a, Vector b) {
 	vector_print(a);
@@ -52,10 +51,10 @@ void testMatrix() {
 }
 
 void test45dgup() {
-	RawDataSet calibration =
+	JoinedDataSet calibration =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
-	RawDataSet dgup45 =
+	JoinedDataSet dgup45 =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/45dgup.csv");
 	calibrate(calibration);
@@ -73,24 +72,25 @@ void test45dgup() {
 }
 
 int main() {
-	RawDataSet calibration =
+	JoinedDataSet calibration =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration-kavi070701.csv");
 	calibrate(calibration);
-	RawDataSet magnetometer =
+	JoinedDataSet magnetometer =
 			read(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/magnetometer-kavi070701.csv");
-	TimePolarVector* polars = magnetometerData(magnetometer);
+	CalibratedDataSet calibrated;
+	calibrated = calibrate_joined_data(magnetometer);
 	FILE* f =
 			fopen(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/polar-cooordinates-kavi070701.csv",
 					"w");
 	fprintf(f, "Time\tTheta\tPhi\n");
 	int i;
-	for (i = 0; polars[i].t >= 0; i++) {
-		fprintf(f, "%f\t%f\t%f\n", polars[i].t,
-				polars[i].pos.theta * 180 / 3.14159,
-				polars[i].pos.phi * 180 / 3.14159);
+	for (i = 0; i < calibrated.len; i++) {
+		fprintf(f, "%f\t%f\t%f\n", calibrated.values[i].t,
+				calibrated.values[i].mag.theta * 180 / 3.14159,
+				calibrated.values[i].mag.phi * 180 / 3.14159);
 	}
 	fclose(f);
 	return 0;

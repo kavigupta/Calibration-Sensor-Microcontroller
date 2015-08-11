@@ -11,11 +11,6 @@
 #include "IO.h"
 #include "Vector.h"
 
-typedef struct {
-	PolarVector pos;
-	double t;
-} TimePolarVector;
-
-TimePolarVector* magnetometerData(RawDataSet data);
+CalibratedDataSet calibrate_joined_data(JoinedDataSet data);
 
 #endif /* ANALYSIS_H_ */

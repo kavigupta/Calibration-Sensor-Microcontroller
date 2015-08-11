@@ -13,50 +13,50 @@
 
 #include "DataSet.h"
 
-RawDataSet read(char* path) {
+JoinedDataSet read(char* path) {
 	FILE* file = fopen(path, "r");
 	if (file == NULL) {
 		printf("File does not exist!");
 		exit(1);
 	}
 	int len = 0;
-	RawData *data = malloc(10 * sizeof(RawData));
+	JoinedData *data = malloc(10 * sizeof(JoinedData));
 	int capacity = 10;
 	char buffer[1000];
 	fgets(buffer, 1000, file);
 	while (1) {
-		RawData line = readLine(file);
+		JoinedData line = readLine(file);
 		if (line.t < 0)
 			break;
-		memcpy(&(data[len]), &line, sizeof(RawData));
+		memcpy(&(data[len]), &line, sizeof(JoinedData));
 		len++;
 		if (len == capacity) {
 			capacity = capacity * 3 / 2;
-			data = realloc(data, capacity * sizeof(RawData));
+			data = realloc(data, capacity * sizeof(JoinedData));
 		}
 	}
-	RawDataSet ds = { .values = data, .len = len };
+	JoinedDataSet ds = { .values = data, .len = len };
 	return ds;
 }
-RawData readLine(FILE* file) {
+JoinedData readLine(FILE* file) {
 	double t, magx, magy, magz, gyrx, gyry, gyrz, aclx, acly, aclz;
 	int code = fscanf(file, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", &t,
 			&magx, &magy, &magz, &gyrx, &gyry, &gyrz, &aclx, &acly, &aclz);
 	if (code != 10) {
-		RawData data = { .t = -1 };
+		JoinedData data = { .t = -1 };
 		return data;
 	}
-	RawData data = { .t = t, .mag = { .x = magx, .y = magy, .z = magz }, .gyr =
+	JoinedData data = { .t = t, .mag = { .x = magx, .y = magy, .z = magz }, .gyr =
 			{ .x = gyrx, .y = gyry, .z = gyrz }, .acl = { .x = aclx, .y = acly,
 			.z = aclz } };
 	return data;
 }
-void writeLine(FILE* file, RawData entry) {
+void writeLine(FILE* file, JoinedData entry) {
 	fprintf(file, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", entry.t,
 			entry.mag.x, entry.mag.y, entry.mag.z, entry.gyr.x, entry.gyr.y,
 			entry.gyr.z, entry.acl.x, entry.acl.y, entry.acl.z);
 }
-void write(char* path, RawDataSet data) {
+void write(char* path, JoinedDataSet data) {
 	int i;
 	FILE* file = fopen(path, "w");
 	fprintf(file, "Time,mx,my,mz,gx,gy,gz,aclx,acly,aclz");

@@ -2,16 +2,16 @@
 #define _VECTOR_H
 
 typedef struct {
-	const double x, y, z;
+	double x, y, z;
 } Vector;
 
 typedef struct {
 	Vector v;
-	const double t;
+	double t;
 } Vector4;
 
 typedef struct {
-	const double r, theta, phi;
+	double r, theta, phi;
 } PolarVector;
 
 extern const Vector VECTOR_UNIT_X;

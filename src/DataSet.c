@@ -12,19 +12,19 @@
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
-RawDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gyrl, Vector4* acl,
+JoinedDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gyrl, Vector4* acl,
 		int acll, double dt) {
 	int im = 0, ig = 0, ia = 0;
 	int size = 0, capacity = 10;
-	RawData* set = malloc(capacity * sizeof(RawData));
+	JoinedData* set = malloc(capacity * sizeof(JoinedData));
 	while ((im < magl) && (ig < gyrl) && (ia < acll)) {
-		RawData next = { .mag = mag[im].v, .gyr = gyr[ig].v, .acl = acl[ia].v, .t =
+		JoinedData next = { .mag = mag[im].v, .gyr = gyr[ig].v, .acl = acl[ia].v, .t =
 				MIN(MIN(mag[im].t, gyr[ig].t), acl[ia].t) };
-		memcpy(&(set[size]), &next, sizeof(RawData));
+		memcpy(&(set[size]), &next, sizeof(JoinedData));
 		size++;
 		if (size == capacity) {
 			capacity = capacity * 3 / 2;
-			set = realloc(set, capacity * sizeof(RawData));
+			set = realloc(set, capacity * sizeof(JoinedData));
 		}
 		while (im < magl && (mag[im].t < set[size - 1].t + dt)) {
 			im++;
@@ -36,11 +36,11 @@ RawDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gyrl, Vector4* acl,
 			ia++;
 		}
 	}
-	RawDataSet output = { .values = set, .len = size };
+	JoinedDataSet output = { .values = set, .len = size };
 	return output;
 }
 
-Vector averageAcl(RawDataSet data) {
+Vector averageAcl(JoinedDataSet data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
@@ -55,7 +55,7 @@ Vector averageAcl(RawDataSet data) {
 	return avg;
 }
 
-Vector averageMag(RawDataSet data) {
+Vector averageMag(JoinedDataSet data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
@@ -69,7 +69,7 @@ Vector averageMag(RawDataSet data) {
 	Vector avg = { .x = x / tsum, .y = y / tsum, .z = z / tsum };
 	return avg;
 }
-Vector averageGyr(RawDataSet data) {
+Vector averageGyr(JoinedDataSet data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;

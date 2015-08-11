@@ -13,18 +13,31 @@
 typedef struct {
 	double t;
 	Vector acl, gyr, mag;
-} RawData;
+} JoinedData;
+
+typedef struct {
+	double t;
+	Vector acl, gyr;
+	PolarVector mag;
+} CalibratedData;
 
 typedef struct {
 	int len;
-	RawData* values;
-} RawDataSet;
+	JoinedData* values;
+} JoinedDataSet;
 
-RawDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gryl, Vector4* acl,
-		int acll, double dt);
+typedef struct {
+	int is_normalized;
+	int is_smoothed;
+	int len;
+	CalibratedData* values;
+} CalibratedDataSet;
 
-Vector averageAcl(RawDataSet data);
-Vector averageMag(RawDataSet data);
-Vector averageGyr(RawDataSet data);
+JoinedDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gryl,
+		Vector4* acl, int acll, double dt);
+
+Vector averageAcl(JoinedDataSet data);
+Vector averageMag(JoinedDataSet data);
+Vector averageGyr(JoinedDataSet data);
 
 #endif /* DATASET_H_ */

@@ -13,9 +13,9 @@
 #define _IO_H
 
 
-RawDataSet read(char* path);
-RawData readLine(FILE* file);
-void writeLine(FILE* file, RawData entry);
-void write(char* path, RawDataSet data);
+JoinedDataSet read(char* path);
+JoinedData readLine(FILE* file);
+void writeLine(FILE* file, JoinedData entry);
+void write(char* path, JoinedDataSet data);
 
 #endif /*_IO_H*/

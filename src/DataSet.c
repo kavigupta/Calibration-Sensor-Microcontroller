@@ -85,28 +85,53 @@ Vector averageGyr(JoinedDataSet data) {
 	return avg;
 }
 
-int offsetOf(CalibratedColumn column) {
+double *dataset_calibrated_fieldByColumn(CalibratedData* data,
+		CalibratedColumn column) {
 	switch (column) {
 		case ACL_X:
-			return GET_CALIDATE_OFF(acl, x);
+			return &data->acl.x;
 		case ACL_Y:
-			return GET_CALIDATE_OFF(acl, y);
+			return &data->acl.y;
 		case ACL_Z:
-			return GET_CALIDATE_OFF(acl, z);
+			return &data->acl.z;
 		case GYR_X:
-			return GET_CALIDATE_OFF(gyr, x);
+			return &data->gyr.x;
 		case GYR_Y:
-			return GET_CALIDATE_OFF(gyr, y);
+			return &data->gyr.y;
 		case GYR_Z:
-			return GET_CALIDATE_OFF(gyr, z);
+			return &data->gyr.z;
 		case MAG_PHI:
-			return GET_OFFSET(CalibratedData, mag, PolarVector, phi);
+			return &data->mag.phi;
 		case MAG_THETA:
-			return GET_OFFSET(CalibratedData, mag, PolarVector, theta);
+			return &data->mag.theta;
 		case MAG_R:
-			return GET_OFFSET(CalibratedData, mag, PolarVector, r);
+			return &data->mag.r;
 	}
-	return -1;
+	return NULL;
+}
+
+char* renderColumn(CalibratedColumn column) {
+	switch (column) {
+		case ACL_X:
+			return "aclx";
+		case ACL_Y:
+			return "acly";
+		case ACL_Z:
+			return "aclz";
+		case GYR_X:
+			return "gyrx";
+		case GYR_Y:
+			return "gyry";
+		case GYR_Z:
+			return "gyrz";
+		case MAG_PHI:
+			return "magphi";
+		case MAG_THETA:
+			return "magtheta";
+		case MAG_R:
+			return "magr";
+	}
+	return "COLUMN_NOT_FOUND";
 }
 
 void peakset_add(PeakSet* peaks, Peak peak) {
@@ -117,12 +142,14 @@ void peakset_add(PeakSet* peaks, Peak peak) {
 }
 
 void peakset_grow(PeakSet* peaks) {
-	peaks->capacity = peaks->capacity * 3 / 2;
-	peaks->values = realloc(peaks->values, peaks->capacity);
+	peaks->capacity = peaks->capacity * 2;
+	peaks->values = realloc(peaks->values, peaks->capacity * sizeof(Peak));
 }
 
-PeakSet peakset_new() {
-	PeakSet ps = { .values = malloc(sizeof(Peak) * 10), .capacity = 10, .size =
-			0 };
+PeakSet* peakset_new() {
+	PeakSet* ps = malloc(sizeof(PeakSet));
+	ps->values = malloc(sizeof(Peak) * 10);
+	ps->capacity = 10;
+	ps->size = 0;
 	return ps;
 }

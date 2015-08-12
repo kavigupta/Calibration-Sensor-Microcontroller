@@ -11,6 +11,8 @@
 #include "Vector.h"
 #include <stddef.h>
 
+#define LAST_CALIBRATED_COLUMN MAG_THETA
+
 typedef struct {
 	double t;
 	Vector acl, gyr, mag;
@@ -21,6 +23,12 @@ typedef struct {
 	Vector acl, gyr;
 	PolarVector mag;
 } CalibratedData;
+
+typedef union {
+	JoinedData joined;
+	CalibratedData calibrated;
+	double data[10];
+} Double10;
 
 typedef struct {
 	int len;
@@ -61,13 +69,12 @@ JoinedDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gryl,
 Vector averageAcl(JoinedDataSet data);
 Vector averageMag(JoinedDataSet data);
 Vector averageGyr(JoinedDataSet data);
-/*
- * Returns the offset within the CalibratedData struct of the given column
- */
-int offsetOf(CalibratedColumn column);
+double *dataset_calibrated_fieldByColumn(CalibratedData* data,
+		CalibratedColumn column);
+char* renderColumn(CalibratedColumn column);
+
 void peakset_add(PeakSet* peaks, Peak peak);
 void peakset_grow(PeakSet* peaks);
-PeakSet peakset_new();
-
+PeakSet* peakset_new();
 
 #endif /* DATASET_H_ */

@@ -12,10 +12,10 @@
 #ifndef _IO_H
 #define _IO_H
 
-
-JoinedDataSet read(char* path);
-JoinedData readLine(FILE* file);
-void writeLine(FILE* file, JoinedData entry);
-void write(char* path, JoinedDataSet data);
-
+JoinedDataSet io_read_joined_dataset(char* path);
+Double10 io_read_line_as_Double10(FILE* file);
+void io_write_line_as_Double10(FILE* file, Double10 entry);
+void io_write_joined_data(char* path, JoinedDataSet data);
+void io_write_calibrated_data(char* path, CalibratedDataSet data);
+void io_write_peaks(char* path, PeakSet* peaks);
 #endif /*_IO_H*/

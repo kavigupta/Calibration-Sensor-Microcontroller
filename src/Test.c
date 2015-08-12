@@ -6,12 +6,15 @@
  */
 
 #include <assert.h>
+#include <dirent.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include "Analysis.h"
 #include "Controller.h"
 #include "DataSet.h"
-#include "Analysis.h"
 #include "IO.h"
 #include "Matrix.h"
 #include "Vector.h"
@@ -52,10 +55,10 @@ void testMatrix() {
 
 void test45dgup() {
 	JoinedDataSet calibration =
-			read(
+			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
 	JoinedDataSet dgup45 =
-			read(
+			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/45dgup.csv");
 	calibrate(calibration);
 	Vector calib = averageMag(calibration);
@@ -71,28 +74,65 @@ void test45dgup() {
 	printf("\n%f\n", vector_mag(displacement));
 }
 
+void peaks(char* file) {
+	printf("Attempting to Calculate Peaks for %s\n", file);
+	JoinedDataSet joined = io_read_joined_dataset(file);
+	CalibratedDataSet data = calibrate_joined_data(joined);
+	strcpy(file + strlen(file) - strlen("C-readable.csv"), "calibr.csv");
+	io_write_calibrated_data(file, data);
+	smooth_calibrated_data(&data);
+	strcpy(file + strlen(file) - strlen("calibr.csv"), "smoothed.csv");
+	io_write_calibrated_data(file, data);
+	normalize_calibrated_data(&data);
+	strcpy(file + strlen(file) - strlen("smoothed.csv"), "normed.csv");
+	io_write_calibrated_data(file, data);
+	PeakSet* ps = find_peaks_in_calibrated_data(&data);
+	strcpy(file + strlen(file) - strlen("normed.csv"), "output.csv");
+	io_write_peaks(file, ps);
+	free(data.values);
+	free(joined.values);
+	free(ps->values);
+	free(ps);
+}
+
+void peaksInDir(char* dir_string) {
+	char* suffix = "/C-readable.csv";
+	DIR *dir;
+	struct dirent *ent;
+	if ((dir = opendir(dir_string)) != NULL) {
+		while ((ent = readdir(dir)) != NULL) {
+			if (ent->d_name[0] == '.')
+				continue;
+			char * file = malloc(
+					strlen(dir_string) + strlen(ent->d_name) + strlen(suffix)
+							+ 2);
+			file[0] = '\0';
+			strcat(file, dir_string);
+			strcat(file, "/");
+			strcat(file, ent->d_name);
+			strcat(file, suffix);
+			peaks(file);
+		}
+		closedir(dir);
+	} else {
+		perror("");
+		exit(-1);
+	}
+}
+
 int main() {
 	JoinedDataSet calibration =
-			read(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration-kavi070701.csv");
+			io_read_joined_dataset(
+					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
 	calibrate(calibration);
-	JoinedDataSet magnetometer =
-			read(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/magnetometer-kavi070701.csv");
-	CalibratedDataSet calibrated;
-	calibrated = calibrate_joined_data(magnetometer);
-	FILE* f =
-			fopen(
-					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/polar-cooordinates-kavi070701.csv",
-					"w");
-	fprintf(f, "Time\tTheta\tPhi\n");
-	int i;
-	for (i = 0; i < calibrated.len; i++) {
-		fprintf(f, "%f\t%f\t%f\n", calibrated.values[i].t,
-				calibrated.values[i].mag.theta * 180 / 3.14159,
-				calibrated.values[i].mag.phi * 180 / 3.14159);
-	}
-	fclose(f);
+	char* dir_string =
+			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
+	peaksInDir(dir_string);
+//	char* path =
+//			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/2015-08-11-doorknob-good-minglei/C-readable.csv";
+//	char* pathcpy = malloc(strlen(path) + 1);
+//	strcpy(pathcpy, path);
+//	peaks(pathcpy);
 	printf("Completed Successfully");
 	return 0;
 }

@@ -10,7 +10,7 @@
 
 #define SMOOTHING_RADIUS 0.4
 
-int radius_index(CalibratedDataSet* data) {
+int smoothing_radius_index(CalibratedDataSet* data) {
 	int plusminus = 0;
 	double initialT = data->values[0].t;
 	while (plusminus < data->len

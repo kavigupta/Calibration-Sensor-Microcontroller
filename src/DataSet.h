@@ -58,23 +58,35 @@ typedef struct {
 	Peak* values;
 } PeakSet;
 
-#define GET_OFFSET(STRUCT, FIELD, FIELD_TYPE, SUBFIELD) \
-	((int)offsetof(STRUCT, FIELD) + (int)offsetof(FIELD_TYPE, SUBFIELD))
-
-#define GET_CALIDATE_OFF(FIELD, DIM) GET_OFFSET(CalibratedData, FIELD, Vector, DIM)
-
-JoinedDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gryl,
+JoinedDataSet dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr, int gryl,
 		Vector4* acl, int acll, double dt);
 
 Vector averageAcl(JoinedDataSet data);
 Vector averageMag(JoinedDataSet data);
 Vector averageGyr(JoinedDataSet data);
-double *dataset_calibrated_fieldByColumn(CalibratedData* data,
+/**
+ * Gets the field in the calibrated data struct corresponding to the
+ * given column
+ */
+double *dataset_column_get_field(CalibratedData* data,
 		CalibratedColumn column);
-char* renderColumn(CalibratedColumn column);
-
-void peakset_add(PeakSet* peaks, Peak peak);
-void peakset_grow(PeakSet* peaks);
-PeakSet* peakset_new();
+/**
+ * Returns a text representation of the given column
+ */
+char* dataset_column_render(CalibratedColumn column);
+/**
+ * Adds the given peak to the given PeakSet, expanding it as
+ * necessary
+ */
+void dataset_peakset_add(PeakSet* peaks, Peak peak);
+/**
+ * Constructs a new empty peakset. Call free() to deallocate
+ * memory allocated in its construction.
+ */
+PeakSet* dataset_peakset_new();
+/**
+ * Frees the given peakset.
+ */
+void dataset_peakset_free(PeakSet* peaks);
 
 #endif /* DATASET_H_ */

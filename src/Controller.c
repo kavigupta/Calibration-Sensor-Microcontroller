@@ -9,7 +9,7 @@
 #include "Vector.h"
 #include <string.h>
 
-void calibrate(JoinedDataSet data) {
+void cntrl_calibrate(JoinedDataSet data) {
 	int i;
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
@@ -36,13 +36,13 @@ void calibrate(JoinedDataSet data) {
 	memcpy(&THETA_CALIBRATION, &Theta, sizeof(Matrix));
 
 }
-Matrix Theta(Vector mag) {
+Matrix cntrl_get_theta(Vector mag) {
 	return matrix_multiply(matrix_rotation(VECTOR_UNIT_X, mag), THETA_CALIBRATION);
 }
-Vector orientation(Matrix Theta) {
+Vector cntrl_get_orientation(Matrix Theta) {
 	return matrix_apply(Theta, VECTOR_UNIT_X);
 }
-Vector normalized_accel(Matrix Theta, Vector unnormalized_accel) {
+Vector cntrl_get_adjusted_accel(Matrix Theta, Vector unnormalized_accel) {
 	return vector_add(unnormalized_accel,
 			vector_scale(matrix_apply(Theta, G_CALIBRATION), -1));
 }

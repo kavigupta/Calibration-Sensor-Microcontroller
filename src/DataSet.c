@@ -12,8 +12,8 @@
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
-JoinedDataSet combine(Vector4* mag, int magl, Vector4* gyr, int gyrl,
-		Vector4* acl, int acll, double dt) {
+JoinedDataSet dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
+		int gyrl, Vector4* acl, int acll, double dt) {
 	int im = 0, ig = 0, ia = 0;
 	int size = 0, capacity = 10;
 	JoinedData* set = malloc(capacity * sizeof(JoinedData));
@@ -85,8 +85,7 @@ Vector averageGyr(JoinedDataSet data) {
 	return avg;
 }
 
-double *dataset_calibrated_fieldByColumn(CalibratedData* data,
-		CalibratedColumn column) {
+double *dataset_column_get_field(CalibratedData* data, CalibratedColumn column) {
 	switch (column) {
 		case ACL_X:
 			return &data->acl.x;
@@ -110,7 +109,7 @@ double *dataset_calibrated_fieldByColumn(CalibratedData* data,
 	return NULL;
 }
 
-char* renderColumn(CalibratedColumn column) {
+char* dataset_column_render(CalibratedColumn column) {
 	switch (column) {
 		case ACL_X:
 			return "aclx";
@@ -134,22 +133,30 @@ char* renderColumn(CalibratedColumn column) {
 	return "COLUMN_NOT_FOUND";
 }
 
-void peakset_add(PeakSet* peaks, Peak peak) {
+void dataset_peakset_add(PeakSet* peaks, Peak peak) {
 	if (peaks->size == peaks->capacity)
-		peakset_grow(peaks);
+		dataset_peakset_grow(peaks);
 	peaks->values[peaks->size] = peak;
 	peaks->size++;
 }
 
-void peakset_grow(PeakSet* peaks) {
+void dataset_peakset_grow(PeakSet* peaks) {
 	peaks->capacity = peaks->capacity * 2;
 	peaks->values = realloc(peaks->values, peaks->capacity * sizeof(Peak));
 }
 
-PeakSet* peakset_new() {
+PeakSet* dataset_peakset_new() {
 	PeakSet* ps = malloc(sizeof(PeakSet));
 	ps->values = malloc(sizeof(Peak) * 10);
 	ps->capacity = 10;
 	ps->size = 0;
 	return ps;
+}
+void dataset_peakset_free(PeakSet* peaks) {
+	if (!peaks)
+		return;
+	free(peaks);
+	if (!peaks->values)
+		return;
+	free(peaks->values);
 }

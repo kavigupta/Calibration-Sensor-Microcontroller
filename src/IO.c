@@ -90,7 +90,7 @@ void io_write_peaks(char* path, PeakSet* peaks) {
 	printf("%d peaks->\n", peaks->size);
 	for (i = 0; i < peaks->size; i++) {
 		fprintf(file, "%f,%s,%f,%d\n", peaks->values[i].t,
-				renderColumn(peaks->values[i].in_what), peaks->values[i].value,
+				dataset_column_render(peaks->values[i].in_what), peaks->values[i].value,
 				peaks->values[i].is_positive_peak);
 	}
 	fclose(file);

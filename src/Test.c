@@ -60,7 +60,7 @@ void test45dgup() {
 	JoinedDataSet dgup45 =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/45dgup.csv");
-	calibrate(calibration);
+	cntrl_calibrate(calibration);
 	Vector calib = averageMag(calibration);
 	Vector mag45 = averageMag(dgup45);
 	vector_print(calib);
@@ -69,7 +69,7 @@ void test45dgup() {
 	printf("%f\n",
 			acos(vector_dot(vector_unit(calib), vector_unit(mag45))) * 180.
 					/ 3.1416);
-	Vector displacement = orientation(Theta(mag45));
+	Vector displacement = cntrl_get_orientation(cntrl_get_theta(mag45));
 	vector_print(displacement);
 	printf("\n%f\n", vector_mag(displacement));
 }
@@ -77,16 +77,16 @@ void test45dgup() {
 void peaks(char* file) {
 	printf("Attempting to Calculate Peaks for %s\n", file);
 	JoinedDataSet joined = io_read_joined_dataset(file);
-	CalibratedDataSet data = calibrate_joined_data(joined);
+	CalibratedDataSet data = analysis_calibrate(joined);
 	strcpy(file + strlen(file) - strlen("C-readable.csv"), "calibr.csv");
 	io_write_calibrated_data(file, data);
-	smooth_calibrated_data(&data);
+	analysis_smooth(&data);
 	strcpy(file + strlen(file) - strlen("calibr.csv"), "smoothed.csv");
 	io_write_calibrated_data(file, data);
-	normalize_calibrated_data(&data);
+	analysis_normalize(&data);
 	strcpy(file + strlen(file) - strlen("smoothed.csv"), "normed.csv");
 	io_write_calibrated_data(file, data);
-	PeakSet* ps = find_peaks_in_calibrated_data(&data);
+	PeakSet* ps = analysis_peak_find(&data);
 	strcpy(file + strlen(file) - strlen("normed.csv"), "output.csv");
 	io_write_peaks(file, ps);
 	free(data.values);
@@ -124,7 +124,7 @@ int main() {
 	JoinedDataSet calibration =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
-	calibrate(calibration);
+	cntrl_calibrate(calibration);
 	char* dir_string =
 			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
 	peaksInDir(dir_string);

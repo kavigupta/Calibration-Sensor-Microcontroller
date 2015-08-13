@@ -54,10 +54,10 @@ void testMatrix() {
 }
 
 void test45dgup() {
-	JoinedDataSet calibration =
+	JoinedDataList calibration =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
-	JoinedDataSet dgup45 =
+	JoinedDataList dgup45 =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/45dgup.csv");
 	cntrl_calibrate(calibration);
@@ -76,8 +76,8 @@ void test45dgup() {
 
 void peaks(char* file) {
 	printf("Attempting to Calculate Peaks for %s\n", file);
-	JoinedDataSet joined = io_read_joined_dataset(file);
-	CalibratedDataSet data = analysis_calibrate(joined);
+	JoinedDataList joined = io_read_joined_dataset(file);
+	CalibratedDataList data = analysis_calibrate(joined);
 	strcpy(file + strlen(file) - strlen("C-readable.csv"), "calibr.csv");
 	io_write_calibrated_data(file, data);
 	analysis_smooth(&data);
@@ -86,12 +86,16 @@ void peaks(char* file) {
 	analysis_normalize(&data);
 	strcpy(file + strlen(file) - strlen("smoothed.csv"), "normed.csv");
 	io_write_calibrated_data(file, data);
-	PeakSet* ps = analysis_peak_find(&data);
+	PeakList** ps = analysis_peak_find(&data);
 	strcpy(file + strlen(file) - strlen("normed.csv"), "output.csv");
 	io_write_peaks(file, ps);
 	free(data.values);
 	free(joined.values);
-	free(ps->values);
+	int col;
+	for (col = 0; col < 9; col++) {
+		free(ps[col]->values);
+		free(ps[col]);
+	}
 	free(ps);
 }
 
@@ -121,7 +125,7 @@ void peaksInDir(char* dir_string) {
 }
 
 int main() {
-	JoinedDataSet calibration =
+	JoinedDataList calibration =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
 	cntrl_calibrate(calibration);

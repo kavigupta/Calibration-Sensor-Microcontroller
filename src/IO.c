@@ -1,4 +1,5 @@
 /*
+ PeakSet* ps = dataset_peakset_new();
  * IO.c
  *
  *  Created on: Jul 6, 2015
@@ -13,7 +14,7 @@
 
 #include "DataSet.h"
 
-JoinedDataSet io_read_joined_dataset(char* path) {
+JoinedDataList io_read_joined_dataset(char* path) {
 	FILE* file = fopen(path, "r");
 	if (file == NULL) {
 //		printf("File does not exist! %s", path);
@@ -37,7 +38,7 @@ JoinedDataSet io_read_joined_dataset(char* path) {
 		}
 	}
 	printf("File %s read! Length = %d\n", path, len);
-	JoinedDataSet ds = { .values = data, .len = len };
+	JoinedDataList ds = { .values = data, .len = len };
 	return ds;
 }
 Double10 io_read_line_as_Double10(FILE* file) {
@@ -64,7 +65,7 @@ void io_write_line_as_Double10(FILE* file, Double10 line) {
 			line.data[5], line.data[6], line.data[7], line.data[8],
 			line.data[9]);
 }
-void io_write_joined_data(char* path, JoinedDataSet data) {
+void io_write_joined_data(char* path, JoinedDataList data) {
 	int i;
 	FILE* file = fopen(path, "w");
 	fprintf(file, "Time,aclx,acly,aclz,gyrx,gyry,gyrz,magx,magy,magz");
@@ -73,7 +74,7 @@ void io_write_joined_data(char* path, JoinedDataSet data) {
 		io_write_line_as_Double10(file, line);
 	}
 }
-void io_write_calibrated_data(char* path, CalibratedDataSet data) {
+void io_write_calibrated_data(char* path, CalibratedDataList data) {
 	printf("Writing to file: %s\n", path);
 	int i;
 	FILE* file = fopen(path, "w");
@@ -83,15 +84,27 @@ void io_write_calibrated_data(char* path, CalibratedDataSet data) {
 		io_write_line_as_Double10(file, line);
 	}
 }
-void io_write_peaks(char* path, PeakSet* peaks) {
+void io_write_peaks(char* path, PeakList** peaks) {
 	int i;
 	FILE* file = fopen(path, "w");
-	fprintf(file, "Time,Column,Value,Is Positive Peak\n");
-	printf("%d peaks->\n", peaks->size);
-	for (i = 0; i < peaks->size; i++) {
-		fprintf(file, "%f,%s,%f,%d\n", peaks->values[i].t,
-				dataset_column_render(peaks->values[i].in_what), peaks->values[i].value,
-				peaks->values[i].is_positive_peak);
+	fprintf(file, "Time,");
+	int col;
+	for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
+		fprintf(file, "%s,", dataset_column_render(col));
+	}
+	fprintf(file, "Is Positive Peak?\n");
+	int column;
+	for (column = 0; column <= LAST_CALIBRATED_COLUMN; column++) {
+		for (i = 0; i < peaks[column]->size; i++) {
+			fprintf(file, "%f,", peaks[column]->values[i].t);
+			for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
+				if (col == column) {
+					fprintf(file, "%f", peaks[column]->values[i].value);
+				}
+				fprintf(file, ",");
+			}
+			fprintf(file, "%d\n", peaks[column]->values[i].is_positive_peak);
+		}
 	}
 	fclose(file);
 }

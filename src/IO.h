@@ -15,7 +15,7 @@
 /**
  * Reads a JoinedDataSet into memory from a file.
  */
-JoinedDataSet io_read_joined_dataset(char* path);
+JoinedDataList io_read_joined_dataset(char* path);
 /**
  * Reads a csv containing 10 floats into a Double10 union, which can represent
  * a JoinedData or CalibratedData struct.
@@ -28,13 +28,13 @@ void io_write_line_as_Double10(FILE* file, Double10 entry);
 /**
  * Writes the given joined data set to a file with headers
  */
-void io_write_joined_data(char* path, JoinedDataSet data);
+void io_write_joined_data(char* path, JoinedDataList data);
 /**
  * Writes the given calibrated data set to a file with headers
  */
-void io_write_calibrated_data(char* path, CalibratedDataSet data);
+void io_write_calibrated_data(char* path, CalibratedDataList data);
 /**
  * Writes a set of peaks to a file with headers
  */
-void io_write_peaks(char* path, PeakSet* peaks);
+void io_write_peaks(char* path, PeakList** peaks);
 #endif /*_IO_H*/

@@ -12,7 +12,7 @@
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
-JoinedDataSet dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
+JoinedDataList dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
 		int gyrl, Vector4* acl, int acll, double dt) {
 	int im = 0, ig = 0, ia = 0;
 	int size = 0, capacity = 10;
@@ -37,11 +37,11 @@ JoinedDataSet dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
 			ia++;
 		}
 	}
-	JoinedDataSet output = { .values = set, .len = size };
+	JoinedDataList output = { .values = set, .len = size };
 	return output;
 }
 
-Vector averageAcl(JoinedDataSet data) {
+Vector averageAcl(JoinedDataList data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
@@ -56,7 +56,7 @@ Vector averageAcl(JoinedDataSet data) {
 	return avg;
 }
 
-Vector averageMag(JoinedDataSet data) {
+Vector averageMag(JoinedDataList data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
@@ -70,7 +70,7 @@ Vector averageMag(JoinedDataSet data) {
 	Vector avg = { .x = x / tsum, .y = y / tsum, .z = z / tsum };
 	return avg;
 }
-Vector averageGyr(JoinedDataSet data) {
+Vector averageGyr(JoinedDataList data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
@@ -133,26 +133,26 @@ char* dataset_column_render(CalibratedColumn column) {
 	return "COLUMN_NOT_FOUND";
 }
 
-void dataset_peakset_add(PeakSet* peaks, Peak peak) {
+void dataset_peakset_add(PeakList* peaks, Peak peak) {
 	if (peaks->size == peaks->capacity)
 		dataset_peakset_grow(peaks);
 	peaks->values[peaks->size] = peak;
 	peaks->size++;
 }
 
-void dataset_peakset_grow(PeakSet* peaks) {
+void dataset_peakset_grow(PeakList* peaks) {
 	peaks->capacity = peaks->capacity * 2;
 	peaks->values = realloc(peaks->values, peaks->capacity * sizeof(Peak));
 }
 
-PeakSet* dataset_peakset_new() {
-	PeakSet* ps = malloc(sizeof(PeakSet));
+PeakList* dataset_peakset_new() {
+	PeakList* ps = malloc(sizeof(PeakList));
 	ps->values = malloc(sizeof(Peak) * 10);
 	ps->capacity = 10;
 	ps->size = 0;
 	return ps;
 }
-void dataset_peakset_free(PeakSet* peaks) {
+void dataset_peakset_free(PeakList* peaks) {
 	if (!peaks)
 		return;
 	free(peaks);

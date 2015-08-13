@@ -20,7 +20,7 @@ Vector G_CALIBRATION;
 /**
  * Uses the given data set to set the THETA and G values of calibration.
  */
-void cntrl_calibrate(JoinedDataSet data);
+void cntrl_calibrate(JoinedDataList data);
 /**
  * Gets the theta matrix associated with the given magenetic field direction,
  * which is used by get_orientation and get_adjusted_accel

@@ -9,7 +9,7 @@
 #include "Vector.h"
 #include <string.h>
 
-void cntrl_calibrate(JoinedDataSet data) {
+void cntrl_calibrate(JoinedDataList data) {
 	int i;
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
@@ -20,8 +20,11 @@ void cntrl_calibrate(JoinedDataSet data) {
 		z += data.values[i].acl.z * dt;
 		tsum += dt;
 	}
+	printf("CALIB::: %f, %f, %f, %f\n", x, y, z, tsum);
 	Vector gbar = { .x = x / tsum, .y = y / tsum, .z = z / tsum };
-	memcpy(&G_CALIBRATION, &gbar, sizeof(Vector));
+	G_CALIBRATION = gbar;
+	vector_print(G_CALIBRATION);
+	printf("\n");
 	x = 0;
 	y = 0;
 	z = 0;
@@ -43,6 +46,15 @@ Vector cntrl_get_orientation(Matrix Theta) {
 	return matrix_apply(Theta, VECTOR_UNIT_X);
 }
 Vector cntrl_get_adjusted_accel(Matrix Theta, Vector unnormalized_accel) {
+	vector_print(G_CALIBRATION);
+	printf("<-- g\n");
+	vector_print(unnormalized_accel);
+	printf("<-- before\n");
+	vector_print(matrix_apply(Theta, G_CALIBRATION));
+	printf("<-- subtract\n");
+	vector_print(vector_add(unnormalized_accel,
+			vector_scale(matrix_apply(Theta, G_CALIBRATION), -1)));
+	printf("<-- result\n");
 	return vector_add(unnormalized_accel,
 			vector_scale(matrix_apply(Theta, G_CALIBRATION), -1));
 }

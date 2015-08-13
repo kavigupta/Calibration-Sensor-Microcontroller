@@ -33,21 +33,20 @@ typedef union {
 typedef struct {
 	int len;
 	JoinedData* values;
-} JoinedDataSet;
+} JoinedDataList;
 
 typedef struct {
 	int is_normalized;
 	int is_smoothed;
 	int len;
 	CalibratedData* values;
-} CalibratedDataSet;
+} CalibratedDataList;
 
 typedef enum {
 	ACL_X, ACL_Y, ACL_Z, GYR_X, GYR_Y, GYR_Z, MAG_R, MAG_PHI, MAG_THETA
 } CalibratedColumn;
 
 typedef struct {
-	CalibratedColumn in_what;
 	int is_positive_peak;
 	double t;
 	double value;
@@ -56,20 +55,29 @@ typedef struct {
 typedef struct {
 	int size, capacity;
 	Peak* values;
-} PeakSet;
+} PeakList;
 
-JoinedDataSet dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr, int gryl,
-		Vector4* acl, int acll, double dt);
+typedef struct {
+	double t_start, t_end;
+	PeakList cols[9];
+} Trial;
 
-Vector averageAcl(JoinedDataSet data);
-Vector averageMag(JoinedDataSet data);
-Vector averageGyr(JoinedDataSet data);
+typedef struct {
+	int size, capacity;
+	Trial* values;
+} TrialList;
+
+JoinedDataList dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
+		int gryl, Vector4* acl, int acll, double dt);
+
+Vector averageAcl(JoinedDataList data);
+Vector averageMag(JoinedDataList data);
+Vector averageGyr(JoinedDataList data);
 /**
  * Gets the field in the calibrated data struct corresponding to the
  * given column
  */
-double *dataset_column_get_field(CalibratedData* data,
-		CalibratedColumn column);
+double *dataset_column_get_field(CalibratedData* data, CalibratedColumn column);
 /**
  * Returns a text representation of the given column
  */
@@ -78,15 +86,15 @@ char* dataset_column_render(CalibratedColumn column);
  * Adds the given peak to the given PeakSet, expanding it as
  * necessary
  */
-void dataset_peakset_add(PeakSet* peaks, Peak peak);
+void dataset_peakset_add(PeakList* peaks, Peak peak);
 /**
  * Constructs a new empty peakset. Call free() to deallocate
  * memory allocated in its construction.
  */
-PeakSet* dataset_peakset_new();
+PeakList* dataset_peakset_new();
 /**
  * Frees the given peakset.
  */
-void dataset_peakset_free(PeakSet* peaks);
+void dataset_peakset_free(PeakList* peaks);
 
 #endif /* DATASET_H_ */

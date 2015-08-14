@@ -10,6 +10,7 @@ C_SRCS += \
 ../src/IO.c \
 ../src/Matrix.c \
 ../src/Test.c \
+../src/Utils.c \
 ../src/Vector.c 
 
 OBJS += \
@@ -19,6 +20,7 @@ OBJS += \
 ./src/IO.o \
 ./src/Matrix.o \
 ./src/Test.o \
+./src/Utils.o \
 ./src/Vector.o 
 
 C_DEPS += \
@@ -28,6 +30,7 @@ C_DEPS += \
 ./src/IO.d \
 ./src/Matrix.d \
 ./src/Test.d \
+./src/Utils.d \
 ./src/Vector.d 
 
 

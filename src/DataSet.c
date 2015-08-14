@@ -12,7 +12,12 @@
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
-JoinedDataList dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
+import_body(list, JoinedData);
+import_body(list, Peak);
+import_body(list, NDS);
+import_body(list, Trial);
+
+list(JoinedData) dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
 		int gyrl, Vector4* acl, int acll, double dt) {
 	int im = 0, ig = 0, ia = 0;
 	int size = 0, capacity = 10;
@@ -37,15 +42,15 @@ JoinedDataList dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
 			ia++;
 		}
 	}
-	JoinedDataList output = { .values = set, .len = size };
+	list(JoinedData) output = { .values = set, .size = size };
 	return output;
 }
 
-Vector averageAcl(JoinedDataList data) {
+Vector averageAcl(list(JoinedData) data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
-	for (i = 0; i < data.len - 1; i++) {
+	for (i = 0; i < data.size - 1; i++) {
 		double dt = data.values[i + 1].t - data.values[i].t;
 		x += data.values[i].acl.x * dt;
 		y += data.values[i].acl.y * dt;
@@ -56,11 +61,11 @@ Vector averageAcl(JoinedDataList data) {
 	return avg;
 }
 
-Vector averageMag(JoinedDataList data) {
+Vector averageMag(list(JoinedData) data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
-	for (i = 0; i < data.len - 1; i++) {
+	for (i = 0; i < data.size - 1; i++) {
 		double dt = data.values[i + 1].t - data.values[i].t;
 		x += data.values[i].mag.x * dt;
 		y += data.values[i].mag.y * dt;
@@ -70,11 +75,11 @@ Vector averageMag(JoinedDataList data) {
 	Vector avg = { .x = x / tsum, .y = y / tsum, .z = z / tsum };
 	return avg;
 }
-Vector averageGyr(JoinedDataList data) {
+Vector averageGyr(list(JoinedData) data) {
 	double x = 0, y = 0, z = 0;
 	double tsum = 0;
 	int i;
-	for (i = 0; i < data.len - 1; i++) {
+	for (i = 0; i < data.size - 1; i++) {
 		double dt = data.values[i + 1].t - data.values[i].t;
 		x += data.values[i].gyr.x * dt;
 		y += data.values[i].gyr.y * dt;
@@ -133,30 +138,6 @@ char* dataset_column_render(CalibratedColumn column) {
 	return "COLUMN_NOT_FOUND";
 }
 
-void dataset_peakset_add(PeakList* peaks, Peak peak) {
-	if (peaks->size == peaks->capacity)
-		dataset_peakset_grow(peaks);
-	peaks->values[peaks->size] = peak;
-	peaks->size++;
-}
-
-void dataset_peakset_grow(PeakList* peaks) {
-	peaks->capacity = peaks->capacity * 2;
-	peaks->values = realloc(peaks->values, peaks->capacity * sizeof(Peak));
-}
-
-PeakList* dataset_peakset_new() {
-	PeakList* ps = malloc(sizeof(PeakList));
-	ps->values = malloc(sizeof(Peak) * 10);
-	ps->capacity = 10;
-	ps->size = 0;
-	return ps;
-}
-void dataset_peakset_free(PeakList* peaks) {
-	if (!peaks)
-		return;
-	free(peaks);
-	if (!peaks->values)
-		return;
-	free(peaks->values);
+double dataset_nds_duration(NDS nds) {
+	return nds.data.values[nds.ind_end].t - nds.data.values[nds.ind_start].t;
 }

@@ -9,7 +9,9 @@
 #define DATASET_H_
 
 #include "Vector.h"
-#include <stddef.h>
+#include "generics.h"
+#include "arraylist.h"
+#include "stdlib.h"
 
 #define LAST_CALIBRATED_COLUMN MAG_THETA
 
@@ -17,6 +19,7 @@ typedef struct {
 	double t;
 	Vector acl, gyr, mag;
 } JoinedData;
+import_header(list, JoinedData);
 
 typedef struct {
 	double t;
@@ -29,11 +32,6 @@ typedef union {
 	CalibratedData calibrated;
 	double data[10];
 } Double10;
-
-typedef struct {
-	int len;
-	JoinedData* values;
-} JoinedDataList;
 
 typedef struct {
 	int is_normalized;
@@ -51,28 +49,27 @@ typedef struct {
 	double t;
 	double value;
 } Peak;
+import_header(list, Peak);
 
 typedef struct {
-	int size, capacity;
-	Peak* values;
-} PeakList;
+	CalibratedDataList data;
+	int ind_start, ind_end;
+} NDS;
+import_header(list, NDS);
 
 typedef struct {
-	double t_start, t_end;
-	PeakList cols[9];
+	NDS data;
+	list(Peak) *cols[9];
 } Trial;
+import_header(list, Trial);
 
-typedef struct {
-	int size, capacity;
-	Trial* values;
-} TrialList;
 
-JoinedDataList dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
-		int gryl, Vector4* acl, int acll, double dt);
+list(JoinedData) dataset_combine_vector4(Vector4* mag, int magl,
+		Vector4* gyr, int gryl, Vector4* acl, int acll, double dt);
 
-Vector averageAcl(JoinedDataList data);
-Vector averageMag(JoinedDataList data);
-Vector averageGyr(JoinedDataList data);
+Vector averageAcl(list(JoinedData) data);
+Vector averageMag(list(JoinedData) data);
+Vector averageGyr(list(JoinedData) data);
 /**
  * Gets the field in the calibrated data struct corresponding to the
  * given column
@@ -82,19 +79,6 @@ double *dataset_column_get_field(CalibratedData* data, CalibratedColumn column);
  * Returns a text representation of the given column
  */
 char* dataset_column_render(CalibratedColumn column);
-/**
- * Adds the given peak to the given PeakSet, expanding it as
- * necessary
- */
-void dataset_peakset_add(PeakList* peaks, Peak peak);
-/**
- * Constructs a new empty peakset. Call free() to deallocate
- * memory allocated in its construction.
- */
-PeakList* dataset_peakset_new();
-/**
- * Frees the given peakset.
- */
-void dataset_peakset_free(PeakList* peaks);
 
+double dataset_nds_duration(NDS nds);
 #endif /* DATASET_H_ */

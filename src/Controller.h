@@ -11,6 +11,7 @@
 #include "IO.h"
 #include "Matrix.h"
 #include "Vector.h"
+#include "DataSet.h"
 
 extern Matrix THETA_CALIBRATION;
 Matrix THETA_CALIBRATION;
@@ -20,7 +21,7 @@ Vector G_CALIBRATION;
 /**
  * Uses the given data set to set the THETA and G values of calibration.
  */
-void cntrl_calibrate(JoinedDataList data);
+void cntrl_calibrate(list(JoinedData) data);
 /**
  * Gets the theta matrix associated with the given magenetic field direction,
  * which is used by get_orientation and get_adjusted_accel

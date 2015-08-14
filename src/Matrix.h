@@ -10,6 +10,7 @@
 #define MATRIX_ELEMENT_COUNT 9
 
 #include "Vector.h"
+#include "DataSet.h"
 
 typedef struct {
 	const double v11, v21, v31, v12, v22, v32, v13, v23, v33;

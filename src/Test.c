@@ -17,6 +17,7 @@
 #include "DataSet.h"
 #include "IO.h"
 #include "Matrix.h"
+#include "Utils.h"
 #include "Vector.h"
 
 void printEquality(Vector a, Vector b) {
@@ -54,10 +55,10 @@ void testMatrix() {
 }
 
 void test45dgup() {
-	JoinedDataList calibration =
+	list(JoinedData) calibration =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
-	JoinedDataList dgup45 =
+	list(JoinedData) dgup45 =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/45dgup.csv");
 	cntrl_calibrate(calibration);
@@ -74,29 +75,26 @@ void test45dgup() {
 	printf("\n%f\n", vector_mag(displacement));
 }
 
-void peaks(char* file) {
-	printf("Attempting to Calculate Peaks for %s\n", file);
-	JoinedDataList joined = io_read_joined_dataset(file);
+void peaks(char* dir) {
+	printf("Attempting to Calculate Peaks for %s\n", dir);
+	char* c_readable = "/C-readable.csv";
+	char* normed = "/normed.csv";
+	char* psplit = "/split.csv";
+	char* output = "/output.csv";
+	char* full_c_readable = utils_concat(dir, c_readable);
+	list(JoinedData) joined = io_read_joined_dataset(full_c_readable);
 	CalibratedDataList data = analysis_calibrate(joined);
-	strcpy(file + strlen(file) - strlen("C-readable.csv"), "calibr.csv");
-	io_write_calibrated_data(file, data);
 	analysis_smooth(&data);
-	strcpy(file + strlen(file) - strlen("calibr.csv"), "smoothed.csv");
-	io_write_calibrated_data(file, data);
 	analysis_normalize(&data);
-	strcpy(file + strlen(file) - strlen("smoothed.csv"), "normed.csv");
-	io_write_calibrated_data(file, data);
-	PeakList** ps = analysis_peak_find(&data);
-	strcpy(file + strlen(file) - strlen("normed.csv"), "output.csv");
-	io_write_peaks(file, ps);
+	list(NDS)* split = analysis_split_data(&data, 10, .4);
+	list(Trial)* trials = analysis_peak_find_all(split);
+	io_write_calibrated_data(utils_concat(dir, normed), data);
+	io_write_normalized_data_segment_list(utils_concat(dir, psplit),
+			utils_concat(dir, output), trials);
+	printf("Written all files\n");
 	free(data.values);
 	free(joined.values);
-	int col;
-	for (col = 0; col < 9; col++) {
-		free(ps[col]->values);
-		free(ps[col]);
-	}
-	free(ps);
+	free(trials);
 }
 
 void peaksInDir(char* dir_string) {
@@ -114,7 +112,6 @@ void peaksInDir(char* dir_string) {
 			strcat(file, dir_string);
 			strcat(file, "/");
 			strcat(file, ent->d_name);
-			strcat(file, suffix);
 			peaks(file);
 		}
 		closedir(dir);
@@ -125,7 +122,7 @@ void peaksInDir(char* dir_string) {
 }
 
 int main() {
-	JoinedDataList calibration =
+	list(JoinedData) calibration =
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
 	cntrl_calibrate(calibration);
@@ -133,7 +130,7 @@ int main() {
 			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
 	peaksInDir(dir_string);
 //	char* path =
-//			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/2015-08-11-doorknob-good-minglei/C-readable.csv";
+//			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/2015-08-12-point-sit-EXT01/C-readable.csv";
 //	char* pathcpy = malloc(strlen(path) + 1);
 //	strcpy(pathcpy, path);
 //	peaks(pathcpy);

@@ -91,12 +91,12 @@ void peaks(char* dir) {
 	CalibratedDataList data = analysis_calibrate(joined);
 	analysis_smooth(&data);
 	analysis_normalize(&data);
-	list(NDS)* split = analysis_split_data(&data, 10, .4);
+	list(NDS)* split = analysis_split_data(&data, 20, .4);
 	list(Trial)* trials = analysis_peak_find_all(split);
 	io_write_calibrated_data(utils_concat(dir, normed), data);
 	io_write_normalized_data_segment_list(utils_concat(dir, psplit),
 			utils_concat(dir, output), trials);
-	analysis_scale_by_peaks(trials, 1);
+	analysis_scale_by_peaks(trials, 2);
 	io_write_normalized_data_segment_list(utils_concat(dir, psplit_stretched),
 			utils_concat(dir, output_stretched), trials);
 	printf("Written all files\n");

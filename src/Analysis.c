@@ -332,12 +332,19 @@ void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols) {
 		for (i = data->ind_start; i < data->ind_end; i++) {
 			CalibratedData *row = &data->data.values[i];
 			if (row->t >= all_peak_times->values[seg + 1]) {
-				seg++;
+				while (all_peak_times->values[seg + 1]
+						== all_peak_times->values[seg])
+					seg++;
 				segdt = all_peak_times->values[seg + 1]
 						- all_peak_times->values[seg];
 			}
 			row->t = ((row->t - all_peak_times->values[seg]) / segdt
 					+ (double) seg) / (double) all_peak_times->size;
+			if (isinf(row->t)) {
+				printf(
+						"IS inf row->t; all_peak_times = %d; seg = %d; segdt = %f\n",
+						all_peak_times->size, seg, segdt);
+			}
 		}
 		list_free_double(all_peak_times);
 	}

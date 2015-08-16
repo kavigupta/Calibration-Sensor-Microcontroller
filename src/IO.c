@@ -8,9 +8,11 @@
 
 #include "IO.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "arraylist.h"
 #include "DataSet.h"
 
 list(JoinedData) io_read_joined_dataset(char* path) {
@@ -86,7 +88,7 @@ void io_write_calibrated_data(char* path, CalibratedDataList data) {
 }
 
 void io_write_normalized_data_segment_list(char* path_data, char* path_peaks,
-		list(Trial)* listTrials) {
+list(Trial)* listTrials) {
 	FILE* file_data = fopen(path_data, "w");
 	FILE* file_peaks = fopen(path_peaks, "w");
 	fprintf(file_data, "%s,", "Relative Time (to start of segment)");
@@ -113,6 +115,9 @@ void io_write_normalized_data_segment_list(char* path_data, char* path_peaks,
 		double totalIntT = finalT - initialT;
 		for (row = nds.ind_start; row < nds.ind_end; row++) {
 			CalibratedData currentData = nds.data.values[row];
+			if (isnan((currentData.t - initialT) / totalIntT)) {
+				printf("Total int t == %f - %f\n", finalT, initialT);
+			}
 			fprintf(file_data, "%f,", (currentData.t - initialT) / totalIntT);
 			for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
 				int segSub;

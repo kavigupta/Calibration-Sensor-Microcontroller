@@ -50,8 +50,7 @@ list(NDS)* analysis_split_data(CalibratedDataList* data, double jumpConstant,
 	int i;
 	for (i = 0; i < data->len; i++) {
 		int thisState = diffTrace[i] > threshold;
-		if (i != data->len - 1) {
-			// otherwise, no matter what, pop it on
+		if (i != data->len - 1) { // last element = next state will be different (i.e., nothing)
 			if (thisState && lastState) { // continue moving
 				continue;
 			} else if (!thisState && !lastState) { // continue resting
@@ -71,10 +70,11 @@ list(NDS)* analysis_split_data(CalibratedDataList* data, double jumpConstant,
 			list_add_NDS(filteredForLength, list->values[i]);
 			continue;
 		}
-		if (i != list->size - 1)
+		if (i != list->size - 1) {
 			i++;
-		filteredForLength->values[filteredForLength->size - 1].ind_end =
-				list->values[i].ind_end;
+			filteredForLength->values[filteredForLength->size - 1].ind_end =
+					list->values[i].ind_end;
+		}
 	}
 	list(NDS) *onlyMovement = list_new_NDS();
 	// add twos from the first moving chunk.

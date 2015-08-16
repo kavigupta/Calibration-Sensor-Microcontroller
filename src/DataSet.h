@@ -15,6 +15,10 @@
 
 #define LAST_CALIBRATED_COLUMN MAG_THETA
 
+import_header(list, int);
+import_header(list, long);
+import_header(list, double);
+
 typedef struct {
 	double t;
 	Vector acl, gyr, mag;
@@ -50,6 +54,7 @@ typedef struct {
 	double value;
 } Peak;
 import_header(list, Peak);
+import_header(list, list(Peak));
 
 typedef struct {
 	CalibratedDataList data;

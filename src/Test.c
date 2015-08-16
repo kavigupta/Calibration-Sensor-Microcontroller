@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "analysis_preprocessing.h"
+#include "analysis_trial_separation.h"
+#include "arraylist.h"
 #include "Analysis.h"
 #include "Controller.h"
 #include "DataSet.h"
@@ -81,6 +84,8 @@ void peaks(char* dir) {
 	char* normed = "/normed.csv";
 	char* psplit = "/split.csv";
 	char* output = "/output.csv";
+	char* psplit_stretched = "/split_stretched.csv";
+	char* output_stretched = "/output_stretched.csv";
 	char* full_c_readable = utils_concat(dir, c_readable);
 	list(JoinedData) joined = io_read_joined_dataset(full_c_readable);
 	CalibratedDataList data = analysis_calibrate(joined);
@@ -91,6 +96,9 @@ void peaks(char* dir) {
 	io_write_calibrated_data(utils_concat(dir, normed), data);
 	io_write_normalized_data_segment_list(utils_concat(dir, psplit),
 			utils_concat(dir, output), trials);
+	analysis_scale_by_peaks(trials, 1);
+	io_write_normalized_data_segment_list(utils_concat(dir, psplit_stretched),
+			utils_concat(dir, output_stretched), trials);
 	printf("Written all files\n");
 	free(data.values);
 	free(joined.values);
@@ -126,14 +134,14 @@ int main() {
 			io_read_joined_dataset(
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
 	cntrl_calibrate(calibration);
-	char* dir_string =
-			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
-	peaksInDir(dir_string);
-//	char* path =
-//			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/2015-08-12-point-sit-EXT01/C-readable.csv";
-//	char* pathcpy = malloc(strlen(path) + 1);
-//	strcpy(pathcpy, path);
-//	peaks(pathcpy);
+//	char* dir_string =
+//			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
+//	peaksInDir(dir_string);
+	char* path =
+			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/doorknob-good";
+	char* pathcpy = malloc(strlen(path) + 1);
+	strcpy(pathcpy, path);
+	peaks(pathcpy);
 	printf("Completed Successfully");
 	return 0;
 }

@@ -18,7 +18,12 @@
 		type* values;\
 	} list;
 
-#define list_interface(list, type)
+#define list_interface(list, type)\
+		list* list_new_##type();\
+		void list_set_##type(list* li, int loc, type el);\
+		type list_get_##type(list* li, int loc);\
+		void list_add_##type(list* li, type el);\
+		void list_free_##type(list* li);\
 
 #define list_impl(list, type)\
 		list* list_new_##type(){\

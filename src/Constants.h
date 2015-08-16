@@ -8,15 +8,10 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+#include "DataSet.h"
+
 #define SMOOTHING_RADIUS 0.4
 
-int smoothing_radius_index(CalibratedDataList* data) {
-	int plusminus = 0;
-	double initialT = data->values[0].t;
-	while (plusminus < data->len
-			&& (data->values[plusminus].t - initialT < SMOOTHING_RADIUS))
-		plusminus++;
-	return plusminus;
-}
+int smoothing_radius_index(CalibratedDataList* data);
 
 #endif /* CONSTANTS_H_ */

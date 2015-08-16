@@ -9,5 +9,6 @@
 #define UTILS_H_
 
 char* utils_concat(char* a, char* b);
+int cmp_double(const void* a, const void* b);
 
 #endif /* UTILS_H_ */

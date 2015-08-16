@@ -12,8 +12,13 @@
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
+import_body(list, int);
+import_body(list, long);
+import_body(list, double);
+
 import_body(list, JoinedData);
 import_body(list, Peak);
+import_body(list, list(Peak));
 import_body(list, NDS);
 import_body(list, Trial);
 

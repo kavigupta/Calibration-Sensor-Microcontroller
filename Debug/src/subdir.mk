@@ -17,7 +17,8 @@ C_SRCS += \
 ../src/analysis_peaktools.c \
 ../src/analysis_preprocessing.c \
 ../src/analysis_segmentation.c \
-../src/analysis_trial_separation.c 
+../src/analysis_trial_separation.c \
+../src/processor_afterthefact.c 
 
 OBJS += \
 ./src/Constants.o \
@@ -33,7 +34,8 @@ OBJS += \
 ./src/analysis_peaktools.o \
 ./src/analysis_preprocessing.o \
 ./src/analysis_segmentation.o \
-./src/analysis_trial_separation.o 
+./src/analysis_trial_separation.o \
+./src/processor_afterthefact.o 
 
 C_DEPS += \
 ./src/Constants.d \
@@ -49,7 +51,8 @@ C_DEPS += \
 ./src/analysis_peaktools.d \
 ./src/analysis_preprocessing.d \
 ./src/analysis_segmentation.d \
-./src/analysis_trial_separation.d 
+./src/analysis_trial_separation.d \
+./src/processor_afterthefact.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

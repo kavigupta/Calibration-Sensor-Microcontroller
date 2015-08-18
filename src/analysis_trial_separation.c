@@ -26,6 +26,7 @@ double* analysis_get_diff_trace(CalibratedDataList* data);
 list(NDS)* analysis_split_data(CalibratedDataList* data, double jumpConstant,
 		double minimumDuration) {
 	double* diffTrace = analysis_get_diff_trace(data);
+	data->len--;
 	double threshold;
 	{
 		int cmp_double(const void *x, const void *y) {
@@ -83,8 +84,8 @@ list(NDS)* analysis_split_data(CalibratedDataList* data, double jumpConstant,
 	for (i = startingState ? 0 : 1; i < filteredForLength->size; i += 2) {
 		list_add_NDS(onlyMovement, filteredForLength->values[i]);
 	}
-	free(list);
-	free(filteredForLength);
+	list_free_NDS(list);
+	list_free_NDS(filteredForLength);
 	return onlyMovement;
 }
 

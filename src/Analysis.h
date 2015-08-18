@@ -13,11 +13,6 @@
 #include "DataSet.h"
 
 /**
- * Finds peaks, using a similar index-interval as analysis_smooth.
- */
-list(Trial)* analysis_peak_find_all(list(NDS)* data);
-
-/**
  * Scales the given trials' timestamps by their most consistent peaks
  * so that the trials' timestamps are correlated by the time within a
  * motion. This will allow the comparison of "time" positions that

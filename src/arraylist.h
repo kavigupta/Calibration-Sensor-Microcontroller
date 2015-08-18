@@ -23,6 +23,7 @@
 		void list_set_##type(list* li, int loc, type el);\
 		type list_get_##type(list* li, int loc);\
 		void list_add_##type(list* li, type el);\
+		list* list_clone_##type(list* li);\
 		void list_free_##type(list* li);\
 
 #define list_impl(list, type)\
@@ -30,7 +31,7 @@
 			list* li = malloc(sizeof(list));\
 			li->size = 0;\
 			li->capacity = 16;\
-			li->values = malloc(li->capacity * sizeof(type));\
+			li->values = calloc(li->capacity, sizeof(type));\
 			return li;\
 		}\
 		void list_set_##type(list* li, int loc, type el){\
@@ -42,10 +43,20 @@
 		void list_add_##type(list* li, type el){\
 			if(li->size == li->capacity){\
 				li->capacity *= 2;\
-				li->values = realloc(li->values, li->capacity * sizeof(type));\
+				type* new_vals = realloc(li->values, li->capacity * sizeof(type));\
+				if(!(new_vals)) free(li->values);\
+				li->values = new_vals;\
 			}\
 			li->values[li->size] = el;\
 			li->size++;\
+		}\
+		list* list_clone_##type(list* li){\
+			int i;\
+			list* clone = list_new_##type();\
+			for(i = 0; i<li->size; i++){\
+				list_add_##type(clone, li->values[i]);\
+			}\
+			return clone;\
 		}\
 		void list_free_##type(list* li){\
 			if(li->values) free(li->values);\

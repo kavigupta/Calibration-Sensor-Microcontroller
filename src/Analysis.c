@@ -11,121 +11,12 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
+#include "analysis_peaktools.h"
 #include "arraylist.h"
-#include "Constants.h"
 #include "DataSet.h"
 #include "Utils.h"
-
-Trial analysis_peak_find(NDS data) {
-	//	printf("Data smoothed: %d lines\n", data->len);
-	int column;
-	list(Peak) *ps[9];
-	for (column = 0; column <= LAST_CALIBRATED_COLUMN; column++) {
-		ps[column] = list_new_Peak();
-		//		printf("Column %d\n", column);
-		double valueI(int i) {
-			return *dataset_column_get_field(&(data.data.values[i]), column);
-		}
-		int plusminus = smoothing_radius_index(&data.data);
-		//		printf("PLUS MINUS INTERVAL %d\n", plusminus);
-		int i;
-		for (i = data.ind_start + plusminus; i < data.ind_end - plusminus;
-				i++) {
-			int bottomOfInterval = i - plusminus;
-			int topOfInterval = i + plusminus;
-			int j;
-			double val = valueI(i);
-			int canBeMax = 1, canBeMin = 1;
-			for (j = bottomOfInterval;
-					j <= topOfInterval && (canBeMin || canBeMax); j++) {
-				if (j == i)
-					continue;
-				double curVal = valueI(j);
-				if (val <= curVal)
-					canBeMax = 0;
-				if (val >= curVal)
-					canBeMin = 0;
-			}
-			if (canBeMax || canBeMin) {
-				Peak current = { .is_positive_peak = canBeMax, .t =
-						data.data.values[i].t, .value = val };
-				list_add_Peak(ps[column], current);
-			}
-		}
-	}
-	Trial t = { .data = data };
-	int i;
-	for (i = 0; i < 9; i++)
-		t.cols[i] = ps[i];
-	return t;
-}
-
-list(Trial)* analysis_peak_find_all(list(NDS)* data) {
-	list(Trial)* tl = list_new_Trial();
-	int seg;
-	for (seg = 0; seg < data->size; seg++) {
-		Trial trial = analysis_peak_find(data->values[seg]);
-		list_add_Trial(tl, trial);
-	}
-	return tl;
-}
-
-int analysis_peaklists_same_pattern(list(Peak)* a, list(Peak)* b) {
-	if (a->size != b->size)
-		return 0;
-	int i;
-	for (i = 0; i < a->size; i++) {
-		if (a->values[i].is_positive_peak != b->values[i].is_positive_peak)
-			return 0;
-	}
-	return 1;
-}
-
-double analysis_scale_within_NDS(NDS nds, double t) {
-	double start = nds.data.values[nds.ind_start].t;
-	double end = nds.data.values[nds.ind_end].t;
-	return (t - start) / (end - start);
-}
-
-double analysis_unscale_within_NDS(NDS nds, double scaled) {
-	double start = nds.data.values[nds.ind_start].t;
-	double end = nds.data.values[nds.ind_end].t;
-	return scaled * (end - start) + start;
-}
-
-list(Peak)* analysis_scale_peaks(list(Peak)* original, NDS nds) {
-	list(Peak) *scaled = list_new_Peak();
-	// offsets this peak so that it's time index is
-	// relative to the total duration of the action
-	int peak;
-	for (peak = 0; peak < original->size; peak++) {
-		Peak at_i = original->values[peak];
-		at_i.t = analysis_scale_within_NDS(nds, at_i.t);
-		list_add_Peak(scaled, at_i);
-	}
-	return scaled;
-}
-list(Peak)* analysis_unscale_peaks(list(Peak)* original, NDS nds) {
-	list(Peak) *scaled = list_new_Peak();
-	// offsets this peak so that it's time index is
-	// relative to the total duration of the action
-	int peak;
-	for (peak = 0; peak < original->size; peak++) {
-		Peak at_i = original->values[peak];
-		at_i.t = analysis_unscale_within_NDS(nds, at_i.t);
-		list_add_Peak(scaled, at_i);
-	}
-	return scaled;
-}
-
-void analysis_add_peaklists(list(Peak)* addInto, list(Peak)* toAdd) {
-	int i;
-	for (i = 0; i < addInto->size; i++) {
-		addInto->values[i].t += toAdd->values[i].t;
-		addInto->values[i].value += toAdd->values[i].value;
-	}
-}
 
 int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 	list(list(Peak))* signatures = list_new_list__Peak();
@@ -133,36 +24,42 @@ int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 	int i = 0;
 	for (i = 0; i < data->size; i++) {
 		list(Peak)* peaks = data->values[i].cols[col];
-		if (peaks->size == 0) {
+		if (peaks->size == 0)
 			continue;
-		}
 		int j;
 		int contained = 0;
 		for (j = 0; j < signatures->size; j++) {
-			if (analysis_peaklists_same_pattern(&signatures->values[j],
-					peaks)) {
+			if (analysis_peaklists_same_pattern(&signatures->values[j], peaks,
+					1, 0)) {
 				// average out the time stamps and values with this one's
-				analysis_add_peaklists(&signatures->values[j],
-						analysis_scale_peaks(peaks, data->values[i].data));
+				list(Peak)* scaled = analysis_apply_peaks(peaks,
+						&data->values[i].data, analysis_scale_within_NDS);
+				analysis_add_peaklists(&signatures->values[j], scaled);
+				list_free_Peak(scaled);
 				sigcounts->values[j]++;
 				contained = 1;
 			}
 		}
 		if (!contained) {
-//			printf("LB%d\n", signatures->size);
-			list_add_list__Peak(signatures,
-					*analysis_scale_peaks(peaks, data->values[i].data));
-//			printf("LA%d\n", signatures->size);
+			list(Peak)* scaled = analysis_apply_peaks(peaks,
+					&data->values[i].data, analysis_scale_within_NDS);
+			list_add_list__Peak(signatures, *scaled);
+			free(scaled);
 			list_add_int(sigcounts, 1);
 		}
 	}
 	int consistency = 0;
 	int consi = -1;
-	*chosen = *list_new_Peak();
+	list(Peak)* empty = list_new_Peak();
+	*chosen = *empty;
+	free(empty);
 	for (i = 0; i < sigcounts->size; i++) {
 		if (consistency < sigcounts->values[i]) {
 			consi = i;
-			*chosen = signatures->values[i];
+			list(Peak)* clone = list_clone_Peak(&signatures->values[i]);
+			free(chosen->values);
+			*chosen = *clone;
+			free(clone);
 			printf("Choosing size %d\n", chosen->size);
 			consistency = sigcounts->values[i];
 		}
@@ -180,6 +77,9 @@ int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 					signatures->values[consi].values[i].is_positive_peak);
 		}
 	}
+	for (i = 0; i < signatures->size; i++) {
+		free(signatures->values[i].values);
+	}
 	list_free_list__Peak(signatures);
 	list_free_int(sigcounts);
 	return consistency;
@@ -187,16 +87,17 @@ int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 
 void analysis_coerce_peaks_within_column(Trial* tr, int col,
 list(Peak)* standard) {
-	list(Peak) **actual = &tr->cols[col];
-	if (analysis_peaklists_same_pattern(standard, *actual))
+	if (analysis_peaklists_same_pattern(standard, tr->cols[col], 1, 0))
 		// no coersion necessary
 		return;
 	printf("Coercing peaks for data col %d\n", col);
-	if ((*actual)->size <= standard->size) {
+	if (tr->cols[col]->size <= standard->size) {
 		printf("Lower size\n");
 		// not enough peaks. This will now use the average peak
 		// signature and unscale it
-		**actual = *analysis_unscale_peaks(standard, tr->data);
+		list_free_Peak(tr->cols[col]);
+		tr->cols[col] = analysis_apply_peaks(standard, &tr->data,
+				analysis_unscale_within_NDS);
 		return;
 	}
 	// actual coersion takes place here.
@@ -206,14 +107,14 @@ list(Peak)* standard) {
 	int offset;
 	double mindiff = DBL_MAX;
 	int minoffset = -1;
-	for (offset = 1; offset < (*actual)->size - standard->size; offset++) {
+	for (offset = 1; offset < tr->cols[col]->size - standard->size; offset++) {
 //		printf("Offset = %d/%d\n", offset, actual->size - standard->size);
 		int peakct;
 		int matches_up_down_pattern = 1;
 		double diff = 0;
 		for (peakct = 0; peakct < standard->size; peakct++) {
-			Peak* peak_actual = &(*actual)->values[peakct];
-			Peak* peak_standrd = &(*actual)->values[peakct];
+			Peak* peak_actual = &tr->cols[col]->values[peakct];
+			Peak* peak_standrd = &tr->cols[col]->values[peakct];
 			if (peak_actual->is_positive_peak
 					!= peak_standrd->is_positive_peak) {
 				matches_up_down_pattern = 0;
@@ -235,7 +136,9 @@ list(Peak)* standard) {
 	if (minoffset < 0) {
 		// no applicable peak signature (highly unlikely). This will now use
 		// the average peak signature and unscale it
-		**actual = *analysis_unscale_peaks(standard, tr->data);
+		list_free_Peak(tr->cols[col]);
+		tr->cols[col] = analysis_apply_peaks(standard, &tr->data,
+				analysis_unscale_within_NDS);
 	} else {
 		// get a signature without the offending peaks.
 		list(Peak) *clean = list_new_Peak();
@@ -243,9 +146,8 @@ list(Peak)* standard) {
 		for (i = minoffset; i < minoffset + standard->size; i++) {
 			list_add_Peak(clean, standard->values[i]);
 		}
-		free((*actual)->values);
-		**actual = *clean;
-		free(clean);
+		list_free_Peak(tr->cols[col]);
+		tr->cols[col] = clean;
 	}
 }
 
@@ -258,6 +160,7 @@ list(int) *top) {
 		list(Peak) *used = &chosen[col];
 		int j;
 		for (j = 0; j < data->size; j++) {
+			// TODO 2
 			analysis_coerce_peaks_within_column(&data->values[j], col, used);
 		}
 	}
@@ -296,15 +199,20 @@ list(int)* find_consistent_peak_columns(list(Trial)* data,
 	for (i = 0; i <= LAST_CALIBRATED_COLUMN; i++) {
 		printf("Col %d: Size %d\n", i, data->values[0].cols[i]->size);
 	}
+	// TODO 1
 	analysis_coerce_peaks(data, chosen, top);
 	int j;
 	for (j = 0; j < data->size; j++) {
 		printf("%d columns\n", data->values[j].cols[cols[0]]->size);
 	}
+	for (j = 0; j <= LAST_CALIBRATED_COLUMN; j++) {
+		free(chosen[j].values);
+	}
 	return top;
 }
 
 void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols) {
+	// check no changes to cols in lTrials TODO 0
 	list(int) *consistent_peaks = find_consistent_peak_columns(lTrials,
 			ncols);
 	int nTrial;
@@ -331,7 +239,8 @@ void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols) {
 				- all_peak_times->values[seg];
 		for (i = data->ind_start; i < data->ind_end; i++) {
 			CalibratedData *row = &data->data.values[i];
-			if (row->t >= all_peak_times->values[seg + 1]) {
+			if (seg + 1 < all_peak_times->size
+					&& row->t >= all_peak_times->values[seg + 1]) {
 				while (all_peak_times->values[seg + 1]
 						== all_peak_times->values[seg])
 					seg++;

@@ -5,8 +5,8 @@
  *      Author: root
  */
 
-#ifndef ARRAYLIST_H_
-#define ARRAYLIST_H_
+#ifndef LIST_H_
+#define LIST_H_
 
 #include "generics.h"
 
@@ -63,4 +63,4 @@
 			if(li) free(li);\
 		}\
 
-#endif /* ARRAYLIST_H_ */
+#endif /* LIST_H_ */

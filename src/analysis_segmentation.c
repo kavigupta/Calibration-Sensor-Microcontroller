@@ -5,22 +5,22 @@
  *      Author: root
  */
 
-#include "Analysis.h"
+#include "analysis_segmentation.h"
 
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include "analysis_peaktools.h"
-#include "arraylist.h"
 #include "DataSet.h"
+#include "list.h"
 #include "Utils.h"
 
-int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
-	list(list(Peak))* signatures = list_new_list__Peak();
-	list(int)* sigcounts = list_new_int();
+void analysis_find_unique_signatures(list(Trial)* data, int col,
+list(list(Peak))** signatures, list(int)** sigcounts) {
+	*signatures = list_new_list__Peak();
+	*sigcounts = list_new_int();
 	int i = 0;
 	for (i = 0; i < data->size; i++) {
 		list(Peak)* peaks = data->values[i].cols[col];
@@ -28,54 +28,59 @@ int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 			continue;
 		int j;
 		int contained = 0;
-		for (j = 0; j < signatures->size; j++) {
-			if (analysis_peaklists_same_pattern(&signatures->values[j], peaks,
-					1, 0)) {
+		for (j = 0; j < (*signatures)->size; j++) {
+			if (analysis_peaklists_same_pattern(&(*signatures)->values[j],
+					peaks, 1, 0)) {
 				// average out the time stamps and values with this one's
 				list(Peak)* scaled = analysis_apply_peaks(peaks,
 						&data->values[i].data, analysis_scale_within_NDS);
-				analysis_add_peaklists(&signatures->values[j], scaled);
+				analysis_add_peaklists(&(*signatures)->values[j], scaled);
 				list_free_Peak(scaled);
-				sigcounts->values[j]++;
+				(*sigcounts)->values[j]++;
 				contained = 1;
 			}
 		}
 		if (!contained) {
 			list(Peak)* scaled = analysis_apply_peaks(peaks,
 					&data->values[i].data, analysis_scale_within_NDS);
-			list_add_list__Peak(signatures, *scaled);
+			list_add_list__Peak(*signatures, *scaled);
 			free(scaled);
-			list_add_int(sigcounts, 1);
+			list_add_int(*sigcounts, 1);
 		}
 	}
+	// divide chosen by it's sigcount (consistency) to get an average
+	for (i = 0; i < (*signatures)->size; i++) {
+		int sigcount = (*sigcounts)->values[i];
+		int j;
+		for (j = 0; j < (*signatures)->values[i].size; j++) {
+			(*signatures)->values[i].values[j].t /= sigcount;
+			(*signatures)->values[i].values[j].value /= sigcount;
+		}
+	}
+}
+
+int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
+	list(list(Peak))* signatures;
+	list(int)* sigcounts;
+	analysis_find_unique_signatures(data, col, &signatures, &sigcounts);
 	int consistency = 0;
-	int consi = -1;
-	list(Peak)* empty = list_new_Peak();
-	*chosen = *empty;
-	free(empty);
+	int most_consistent_trial = -1;
+	int i;
 	for (i = 0; i < sigcounts->size; i++) {
 		if (consistency < sigcounts->values[i]) {
-			consi = i;
-			list(Peak)* clone = list_clone_Peak(&signatures->values[i]);
-			free(chosen->values);
-			*chosen = *clone;
-			free(clone);
-			printf("Choosing size %d\n", chosen->size);
 			consistency = sigcounts->values[i];
+			most_consistent_trial = i;
 		}
 	}
-	if (consi != -1) {
-		// divide chosen by it's sigcount (consistency) to get an average
-		for (i = 0; i < chosen->size; i++) {
-			chosen->values[i].t /= consistency;
-			chosen->values[i].value /= consistency;
-		}
-		printf("Representative List for Column %d is (with %d adherents)\n",
-				col, consistency);
-		for (i = 0; i < signatures->values[consi].size; i++) {
-			printf("\t%d\n",
-					signatures->values[consi].values[i].is_positive_peak);
-		}
+	if (most_consistent_trial >= 0) {
+		list(Peak)* clone = list_clone_Peak(
+				&signatures->values[most_consistent_trial]);
+		*chosen = *clone;
+		free(clone);
+	}else{
+		list(Peak)* empty = list_new_Peak();
+		*chosen = *empty;
+		free(empty);
 	}
 	for (i = 0; i < signatures->size; i++) {
 		free(signatures->values[i].values);
@@ -90,7 +95,6 @@ list(Peak)* standard) {
 	if (analysis_peaklists_same_pattern(standard, tr->cols[col], 1, 0))
 		// no coersion necessary
 		return;
-	printf("Coercing peaks for data col %d\n", col);
 	if (tr->cols[col]->size <= standard->size) {
 		printf("Lower size\n");
 		// not enough peaks. This will now use the average peak
@@ -160,7 +164,6 @@ list(int) *top) {
 		list(Peak) *used = &chosen[col];
 		int j;
 		for (j = 0; j < data->size; j++) {
-			// TODO 2
 			analysis_coerce_peaks_within_column(&data->values[j], col, used);
 		}
 	}
@@ -192,19 +195,10 @@ list(int)* find_consistent_peak_columns(list(Trial)* data,
 			compare_cols_by_consistency);
 	list(int)* top = list_new_int();
 	for (i = 0; i < requested_quantity; i++) {
-		printf("The %dth most consistent column is %d, with %d repeats each\n",
-				i, cols[i], consistencies[cols[i]]);
 		list_add_int(top, cols[i]);
 	}
-	for (i = 0; i <= LAST_CALIBRATED_COLUMN; i++) {
-		printf("Col %d: Size %d\n", i, data->values[0].cols[i]->size);
-	}
-	// TODO 1
 	analysis_coerce_peaks(data, chosen, top);
 	int j;
-	for (j = 0; j < data->size; j++) {
-		printf("%d columns\n", data->values[j].cols[cols[0]]->size);
-	}
 	for (j = 0; j <= LAST_CALIBRATED_COLUMN; j++) {
 		free(chosen[j].values);
 	}
@@ -212,7 +206,6 @@ list(int)* find_consistent_peak_columns(list(Trial)* data,
 }
 
 void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols) {
-	// check no changes to cols in lTrials TODO 0
 	list(int) *consistent_peaks = find_consistent_peak_columns(lTrials,
 			ncols);
 	int nTrial;
@@ -224,7 +217,6 @@ void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols) {
 		for (i = 0; i < consistent_peaks->size; i++) {
 			list(Peak) *current_peaks =
 					(tr->cols)[consistent_peaks->values[i]];
-			printf("Current size = %d\n", current_peaks->size);
 			int peak;
 			for (peak = 0; peak < current_peaks->size; peak++) {
 				list_add_double(all_peak_times, current_peaks->values[peak].t);

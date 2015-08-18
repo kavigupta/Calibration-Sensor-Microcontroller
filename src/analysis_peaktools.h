@@ -8,8 +8,8 @@
 #ifndef ANALYSIS_PEAKTOOLS_H_
 #define ANALYSIS_PEAKTOOLS_H_
 
-#include "arraylist.h"
 #include "DataSet.h"
+#include "list.h"
 
 /**
  * Checks whether the given PeakLists have the same pattern (up/down) or not.
@@ -41,7 +41,7 @@ double analysis_unscale_within_NDS(NDS *nds, double scaled);
 list(Peak)* analysis_apply_peaks(list(Peak)* original, NDS *nds,
 		double (to_apply)(NDS *nds, double scaled));
 /**
- * Adds the second peaklist into the first as a Vector, where each of the
+ * Adds the second peaklist into the first as if they are vectors, where each of the
  * second's peaks' values and times are added into the first's.
  */
 void analysis_add_peaklists(list(Peak)* addInto, list(Peak)* toAdd);

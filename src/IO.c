@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "arraylist.h"
 #include "DataSet.h"
+#include "list.h"
 
 list(JoinedData) io_read_joined_dataset(char* path) {
 	FILE* file = fopen(path, "r");

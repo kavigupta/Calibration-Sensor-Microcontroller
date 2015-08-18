@@ -8,8 +8,8 @@
 #ifndef ANALYSIS_TRIAL_SEPARATION_H_
 #define ANALYSIS_TRIAL_SEPARATION_H_
 
-#include "arraylist.h"
 #include "DataSet.h"
+#include "list.h"
 
 /**
  * Splits the given data set into segments, each of which represents

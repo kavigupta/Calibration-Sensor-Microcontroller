@@ -11,10 +11,6 @@
 #include "DataSet.h"
 
 /**
- * Finds peaks, in the given NDS and packages them into a trial.
- */
-Trial analysis_peak_find(NDS data);
-/**
  * Finds peaks, using a similar index-interval as analysis_smooth.
  */
 list(Trial)* analysis_peak_find_all(list(NDS)* data);

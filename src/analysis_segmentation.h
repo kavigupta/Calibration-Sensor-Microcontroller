@@ -5,8 +5,8 @@
  *      Author: root
  */
 
-#ifndef ANALYSIS_H_
-#define ANALYSIS_H_
+#ifndef ANALYSIS_SEGMENTATION_H_
+#define ANALYSIS_SEGMENTATION_H_
 
 #include "IO.h"
 #include "Vector.h"
@@ -22,4 +22,4 @@
  */
 void analysis_scale_by_peaks(list(Trial)* data, int ncols);
 
-#endif /* ANALYSIS_H_ */
+#endif /* ANALYSIS_SEGMENTATION_H_ */

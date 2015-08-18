@@ -7,8 +7,8 @@
 
 #include "analysis_peaktools.h"
 
-#include "arraylist.h"
 #include "DataSet.h"
+#include "list.h"
 
 int analysis_peaklists_same_pattern(list(Peak)* a, list(Peak)* b,
 		int same_length, int offset) {

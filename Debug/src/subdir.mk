@@ -4,7 +4,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/Analysis.c \
 ../src/Constants.c \
 ../src/Controller.c \
 ../src/DataSet.c \
@@ -16,10 +15,10 @@ C_SRCS += \
 ../src/analysis_peakfind.c \
 ../src/analysis_peaktools.c \
 ../src/analysis_preprocessing.c \
+../src/analysis_segmentation.c \
 ../src/analysis_trial_separation.c 
 
 OBJS += \
-./src/Analysis.o \
 ./src/Constants.o \
 ./src/Controller.o \
 ./src/DataSet.o \
@@ -31,10 +30,10 @@ OBJS += \
 ./src/analysis_peakfind.o \
 ./src/analysis_peaktools.o \
 ./src/analysis_preprocessing.o \
+./src/analysis_segmentation.o \
 ./src/analysis_trial_separation.o 
 
 C_DEPS += \
-./src/Analysis.d \
 ./src/Constants.d \
 ./src/Controller.d \
 ./src/DataSet.d \
@@ -46,6 +45,7 @@ C_DEPS += \
 ./src/analysis_peakfind.d \
 ./src/analysis_peaktools.d \
 ./src/analysis_preprocessing.d \
+./src/analysis_segmentation.d \
 ./src/analysis_trial_separation.d 
 
 

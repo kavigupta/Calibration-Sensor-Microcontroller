@@ -1,12 +1,25 @@
-
-
 #include "analysis_peakfind.h"
 
-#include "arraylist.h"
 #include "Constants.h"
 #include "DataSet.h"
+#include "list.h"
 
-Trial analysis_peak_find(NDS data) {
+/**
+ * Finds peaks, in the given NDS and packages them into a trial.
+ */
+static Trial analysis_peak_find(NDS data);
+
+list(Trial)* analysis_peak_find_all(list(NDS)* data) {
+	list(Trial)* tl = list_new_Trial();
+	int seg;
+	for (seg = 0; seg < data->size; seg++) {
+		Trial trial = analysis_peak_find(data->values[seg]);
+		list_add_Trial(tl, trial);
+	}
+	return tl;
+}
+
+static Trial analysis_peak_find(NDS data) {
 	//	printf("Data smoothed: %d lines\n", data->len);
 	int column;
 	list(Peak) *ps[9];
@@ -48,14 +61,4 @@ Trial analysis_peak_find(NDS data) {
 	for (i = 0; i < 9; i++)
 		t.cols[i] = ps[i];
 	return t;
-}
-
-list(Trial)* analysis_peak_find_all(list(NDS)* data) {
-	list(Trial)* tl = list_new_Trial();
-	int seg;
-	for (seg = 0; seg < data->size; seg++) {
-		Trial trial = analysis_peak_find(data->values[seg]);
-		list_add_Trial(tl, trial);
-	}
-	return tl;
 }

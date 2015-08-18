@@ -10,8 +10,8 @@
 
 #include "Vector.h"
 #include "generics.h"
-#include "arraylist.h"
 #include "stdlib.h"
+#include "list.h"
 
 #define LAST_CALIBRATED_COLUMN MAG_THETA
 

@@ -8,10 +8,10 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "arraylist.h"
 #include "Constants.h"
 #include "Controller.h"
 #include "DataSet.h"
+#include "list.h"
 #include "Matrix.h"
 #include "Vector.h"
 

@@ -12,8 +12,8 @@
 #include <string.h>
 
 #include "analysis_preprocessing.h"
-#include "arraylist.h"
 #include "DataSet.h"
+#include "list.h"
 
 /**
  * Calculates the sum over every row of the square of the difference of each

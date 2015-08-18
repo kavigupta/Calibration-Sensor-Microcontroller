@@ -9,10 +9,10 @@
  */
 static Trial analysis_peak_find(NDS data);
 
-list(Trial)* analysis_peak_find_all(list(NDS)* data) {
+list(Trial)* analysis_peak_find_all(list(NDS)* data, int to_be_removed) {
 	list(Trial)* tl = list_new_Trial();
 	int seg;
-	for (seg = 0; seg < data->size; seg++) {
+	for (seg = to_be_removed; seg < data->size - to_be_removed; seg++) {
 		Trial trial = analysis_peak_find(data->values[seg]);
 		list_add_Trial(tl, trial);
 	}

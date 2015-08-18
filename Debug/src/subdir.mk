@@ -8,6 +8,7 @@ C_SRCS += \
 ../src/Controller.c \
 ../src/DataSet.c \
 ../src/IO.c \
+../src/Main.c \
 ../src/Matrix.c \
 ../src/Test.c \
 ../src/Utils.c \
@@ -23,6 +24,7 @@ OBJS += \
 ./src/Controller.o \
 ./src/DataSet.o \
 ./src/IO.o \
+./src/Main.o \
 ./src/Matrix.o \
 ./src/Test.o \
 ./src/Utils.o \
@@ -38,6 +40,7 @@ C_DEPS += \
 ./src/Controller.d \
 ./src/DataSet.d \
 ./src/IO.d \
+./src/Main.d \
 ./src/Matrix.d \
 ./src/Test.d \
 ./src/Utils.d \

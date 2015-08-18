@@ -10,5 +10,9 @@
 
 char* utils_concat(char* a, char* b);
 int cmp_double(const void* a, const void* b);
+/**
+ * Applies the given function to every path in the given directory
+ */
+void foreach_in_dir(char* dir_string, void (apply_to_all)(char*));
 
 #endif /* UTILS_H_ */

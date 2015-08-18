@@ -1,29 +1,19 @@
-src/Test.d: ../src/Test.c ../src/analysis_peakfind.h ../src/DataSet.h \
- ../src/Vector.h ../src/generics.h ../src/arraylist.h \
- ../src/analysis_preprocessing.h ../src/analysis_segmentation.h \
- ../src/IO.h ../src/analysis_trial_separation.h ../src/Controller.h \
- ../src/Matrix.h ../src/Utils.h
+src/Test.d: ../src/Test.c ../src/Test.h ../src/Vector.h \
+ ../src/Controller.h ../src/IO.h ../src/DataSet.h ../src/generics.h \
+ ../src/list.h ../src/Matrix.h
 
-../src/analysis_peakfind.h:
-
-../src/DataSet.h:
+../src/Test.h:
 
 ../src/Vector.h:
 
-../src/generics.h:
-
-../src/arraylist.h:
-
-../src/analysis_preprocessing.h:
-
-../src/analysis_segmentation.h:
+../src/Controller.h:
 
 ../src/IO.h:
 
-../src/analysis_trial_separation.h:
+../src/DataSet.h:
 
-../src/Controller.h:
+../src/generics.h:
+
+../src/list.h:
 
 ../src/Matrix.h:
-
-../src/Utils.h:

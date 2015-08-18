@@ -15,9 +15,12 @@
 
 #define LAST_CALIBRATED_COLUMN MAG_THETA
 
+typedef void* void_ptr;
+
 import_header(list, int);
 import_header(list, long);
 import_header(list, double);
+import_header(list, void_ptr);
 
 typedef struct {
 	double t;

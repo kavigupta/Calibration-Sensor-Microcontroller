@@ -1,0 +1,7 @@
+Samples per Trial
+2
+Column,Signature Length,Signature...
+0,0,
+aclx (mu), aclx (sigma),acly (mu), acly (sigma),aclz (mu), aclz (sigma),gyrx (mu), gyrx (sigma),gyry (mu), gyry (sigma),gyrz (mu), gyrz (sigma),magr (mu), magr (sigma),magphi (mu), magphi (sigma),magtheta (mu), magtheta (sigma),
+0.868117,1.426027,0.817755,1.340198,-0.492623,0.820594,-0.194950,0.349836,0.406610,0.695716,0.423342,0.827348,0.000000,0.000000,-0.782097,1.299087,-0.829913,1.363341,
+-0.830064,1.356479,-0.815412,1.333927,0.354328,0.699433,0.185879,0.405695,-0.113324,0.302401,0.429616,0.770632,0.000000,0.000000,0.738553,1.210316,0.809675,1.323137,

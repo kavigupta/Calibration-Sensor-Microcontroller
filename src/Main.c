@@ -20,12 +20,12 @@ int main() {
 					"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/calibration.csv");
 	cntrl_calibrate(calibration);
 	free(calibration.values);
-//	char* dir_string =
-//			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
-//	foreach_in_dir(dir_string, process_content_folder);
-	char* path =
-			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/doorknob-good";
-	process_content_folder(path);
+	char* dir_string =
+			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
+	foreach_in_dir(dir_string, process_content_folder);
+//	char* path =
+//			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/doorknob-good";
+//	process_content_folder(path);
 	printf("Completed Successfully\n");
 	return 0;
 }

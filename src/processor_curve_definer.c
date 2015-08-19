@@ -5,7 +5,7 @@
  *      Author: root
  */
 
-#include "processor_afterthefact.h"
+#include "processor_curve_definer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,7 @@
 #include "analysis_preprocessing.h"
 #include "analysis_segmentation.h"
 #include "analysis_trial_separation.h"
+#include "Constants.h"
 #include "DataSet.h"
 #include "IO.h"
 #include "list.h"
@@ -53,8 +54,10 @@ CleanableTrialList read_single_dataset(char* dir, char* c_readable) {
 	free(joined.values);
 	analysis_smooth(&data);
 	analysis_normalize(&data);
-	list(NDS)* split = analysis_split_data(&data, 20, .4);
-	list(Trial)* trials = analysis_peak_find_all(split, 2);
+	list(NDS)* split = analysis_split_data(&data, JUMP_CONSTANT,
+	MINIMUM_TRIAL_DURATION);
+	list(Trial)* trials = analysis_peak_find_all(split,
+	TRIALS_REMOVED_FROM_EITHER_END);
 	char* normed = utils_concat(dir, "/normed.csv");
 	io_write_calibrated_data(normed, data);
 	free(normed);
@@ -77,9 +80,12 @@ CleanableTrialList read_all_datasets(char* dir) {
 			list_new_void_ptr() };
 	void read_dir(char* lcl_dir) {
 		char* cread = utils_concat(lcl_dir, "/C-readable.csv");
-		if (access(cread, F_OK) == -1)
+		if (access(cread, F_OK) == -1) {
+			free(cread);
 			return;
+		}
 		CleanableTrialList current = read_single_dataset(lcl_dir, cread);
+		free(cread);
 		int i;
 		for (i = 0; i < current.data->size; i++) {
 			list_add_Trial(general.data, current.data->values[i]);
@@ -99,14 +105,19 @@ void process_content_folder(char* dir) {
 	printf("Attempting to Calculate Peaks for %s\n", dir);
 	CleanableTrialList read = read_all_datasets(dir);
 	list(Trial)* trials = read.data;
-	char* psplit = utils_concat(dir, "/peak_split.csv");
-	char* output = utils_concat(dir, "/output.csv");
+	char* psplit = utils_concat(dir, "/split.csv");
+	char* output = utils_concat(dir, "/peaks.csv");
 	io_write_normalized_data_segment_list(psplit, output, trials);
 	free(psplit);
 	free(output);
-	analysis_scale_by_peaks(trials, 2);
+	analysis_scale_by_peaks(trials, COLS_USED_FOR_PEAK_DET,
+	REMOVE_NONSTANDARD_COLS);
+	if (trials->size > 0)
+		printf("Starting t = %f\n",
+				trials->values[0].data.data.values[trials->values[0].data.ind_start
+						+ 1].t);
 	char* psplit_stretched = utils_concat(dir, "/split_stretched.csv");
-	char* output_stretched = utils_concat(dir, "/output_stretched.csv");
+	char* output_stretched = utils_concat(dir, "/peaks_stretched.csv");
 	io_write_normalized_data_segment_list(psplit_stretched, output_stretched,
 			trials);
 	free(psplit_stretched);
@@ -114,10 +125,7 @@ void process_content_folder(char* dir) {
 	printf("Written all files\n");
 	int i;
 	for (i = 0; i < trials->size; i++) {
-		int j;
-		for (j = 0; j <= LAST_CALIBRATED_COLUMN; j++) {
-			list_free_Peak(trials->values[i].cols[j]);
-		}
+		dataset_free_trial(trials->values[i]);
 	}
 	list_free_Trial(trials);
 	for (i = 0; i < read.to_free_on_exit->size; i++) {

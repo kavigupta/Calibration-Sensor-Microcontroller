@@ -8,7 +8,6 @@
 #ifndef LIST_H_
 #define LIST_H_
 
-#include "generics.h"
 
 #define list(type) __(list, type)
 
@@ -24,6 +23,7 @@
 		type list_get_##type(list* li, int loc);\
 		void list_add_##type(list* li, type el);\
 		list* list_clone_##type(list* li);\
+		void list_print_##type(list* li, char* (render)(type t));\
 		void list_free_##type(list* li);\
 
 #define list_impl(list, type)\
@@ -57,6 +57,16 @@
 				list_add_##type(clone, li->values[i]);\
 			}\
 			return clone;\
+		}\
+		void list_print_##type(list* li, char* (render)(type t)){\
+			int i;\
+			printf("[");\
+			for(i = 0; i<li->size; i++){\
+				char* rendered = render(li->values[i]);\
+				printf("%s, ", rendered);\
+				free(rendered);\
+			}\
+			printf("]\n");\
 		}\
 		void list_free_##type(list* li){\
 			if(li->values) free(li->values);\

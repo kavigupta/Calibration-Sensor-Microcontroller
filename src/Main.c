@@ -11,7 +11,8 @@
 #include "Controller.h"
 #include "IO.h"
 #include "list.h"
-#include "processor_afterthefact.h"
+#include "processor_curve_definer.h"
+#include "Utils.h"
 
 int main() {
 	list(JoinedData) calibration =
@@ -21,10 +22,10 @@ int main() {
 	free(calibration.values);
 //	char* dir_string =
 //			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
-//	foreach_in_dir(dir_string, process_single_content_folder);
+//	foreach_in_dir(dir_string, process_content_folder);
 	char* path =
 			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/doorknob-good";
 	process_content_folder(path);
-	printf("Completed Successfully");
+	printf("Completed Successfully\n");
 	return 0;
 }

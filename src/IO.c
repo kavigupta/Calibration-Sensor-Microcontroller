@@ -26,7 +26,6 @@ list(JoinedData) io_read_joined_dataset(char* path) {
 	int capacity = 10;
 	char buffer[1000];
 	fgets(buffer, 1000, file);
-	printf("Initial Contents: %s\n", buffer);
 	while (1) {
 		JoinedData line = io_read_line_as_Double10(file).joined;
 		if (line.t < 0)
@@ -76,7 +75,6 @@ void io_write_joined_data(char* path, list(JoinedData) data) {
 	}
 }
 void io_write_calibrated_data(char* path, CalibratedDataList data) {
-	printf("Writing to file: %s\n", path);
 	int i;
 	FILE* file = fopen(path, "w");
 	fprintf(file, "Time,aclx,acly,aclz,gx,gy,gz,mr,mtheta,mphi");
@@ -111,14 +109,9 @@ list(Trial)* listTrials) {
 		NDS nds = currentTrial.data;
 		int row;
 		double initialT = nds.data.values[nds.ind_start].t;
-		double finalT = nds.data.values[nds.ind_end - 1].t;
-		double totalIntT = finalT - initialT;
 		for (row = nds.ind_start; row < nds.ind_end; row++) {
 			CalibratedData currentData = nds.data.values[row];
-			if (isnan((currentData.t - initialT) / totalIntT)) {
-				printf("Total int t == %f - %f\n", finalT, initialT);
-			}
-			fprintf(file_data, "%f,", (currentData.t - initialT) / totalIntT);
+			fprintf(file_data, "%f,", (currentData.t - initialT));
 			for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
 				int segSub;
 				for (segSub = 0; segSub < listTrials->size; segSub++) {
@@ -136,7 +129,7 @@ list(Trial)* listTrials) {
 			list(Peak)* curPeaks = currentTrial.cols[col];
 			for (row = 0; row < curPeaks->size; row++) {
 				Peak curPeak = curPeaks->values[row];
-				fprintf(file_peaks, "%f,", (curPeak.t - initialT) / totalIntT);
+				fprintf(file_peaks, "%f,", (curPeak.t - initialT));
 				int print_seg, print_col;
 				for (print_col = 0; print_col <= LAST_CALIBRATED_COLUMN;
 						print_col++) {

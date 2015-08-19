@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include "analysis_peaktools.h"
+#include "analysis_preprocessing.h"
 #include "DataSet.h"
 #include "list.h"
 #include "Utils.h"
@@ -77,7 +78,7 @@ int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 				&signatures->values[most_consistent_trial]);
 		*chosen = *clone;
 		free(clone);
-	}else{
+	} else {
 		list(Peak)* empty = list_new_Peak();
 		*chosen = *empty;
 		free(empty);
@@ -90,19 +91,22 @@ int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 	return consistency;
 }
 
-void analysis_coerce_peaks_within_column(Trial* tr, int col,
-list(Peak)* standard) {
-	if (analysis_peaklists_same_pattern(standard, tr->cols[col], 1, 0))
+int analysis_coerce_peaks_within_column(Trial* tr, int col,
+list(Peak)* standard, int reject_nonstandardly_patterned_peaks) {
+	if (analysis_peaklists_same_pattern(standard, tr->cols[col], 1, 0)) {
 		// no coersion necessary
-		return;
+		return 1;
+	}
 	if (tr->cols[col]->size <= standard->size) {
 		printf("Lower size\n");
+		if (reject_nonstandardly_patterned_peaks)
+			return 0;
 		// not enough peaks. This will now use the average peak
 		// signature and unscale it
 		list_free_Peak(tr->cols[col]);
 		tr->cols[col] = analysis_apply_peaks(standard, &tr->data,
 				analysis_unscale_within_NDS);
-		return;
+		return 1;
 	}
 	// actual coersion takes place here.
 	// This will choose between different options with the
@@ -138,34 +142,48 @@ list(Peak)* standard) {
 		minoffset = offset;
 	}
 	if (minoffset < 0) {
-		// no applicable peak signature (highly unlikely). This will now use
-		// the average peak signature and unscale it
+		// no applicable peak signature (highly unlikely).
+		if (reject_nonstandardly_patterned_peaks)
+			return 0;
+		// This will now use the average peak signature and unscale it
 		list_free_Peak(tr->cols[col]);
 		tr->cols[col] = analysis_apply_peaks(standard, &tr->data,
 				analysis_unscale_within_NDS);
 	} else {
+		printf("Cleaning signature\n");
 		// get a signature without the offending peaks.
 		list(Peak) *clean = list_new_Peak();
 		int i;
 		for (i = minoffset; i < minoffset + standard->size; i++) {
-			list_add_Peak(clean, standard->values[i]);
+			list_add_Peak(clean, tr->cols[col]->values[i]);
 		}
 		list_free_Peak(tr->cols[col]);
 		tr->cols[col] = clean;
 	}
+	return 1;
 }
 
 void analysis_coerce_peaks(list(Trial)* data,
 list(Peak) chosen[LAST_CALIBRATED_COLUMN + 1],
-list(int) *top) {
+list(int) *top, int reject_nonstandardly_patterned_peaks) {
 	int i;
 	for (i = 0; i < top->size; i++) {
+		list(Trial) *appl = list_new_Trial();
 		int col = top->values[i];
 		list(Peak) *used = &chosen[col];
 		int j;
 		for (j = 0; j < data->size; j++) {
-			analysis_coerce_peaks_within_column(&data->values[j], col, used);
+			int valid = analysis_coerce_peaks_within_column(&data->values[j],
+					col, used, reject_nonstandardly_patterned_peaks);
+			if (!valid) {
+				dataset_free_trial(data->values[j]);
+			} else {
+				list_add_Trial(appl, data->values[j]);
+			}
 		}
+		free(data->values);
+		*data = *appl;
+		free(appl);
 	}
 }
 
@@ -173,7 +191,7 @@ list(int) *top) {
  * Finds columns which contain the most consistent peaks.
  */
 list(int)* find_consistent_peak_columns(list(Trial)* data,
-		int requested_quantity) {
+		int requested_quantity, int reject_nonstandardly_patterned_peaks) {
 	int cols[LAST_CALIBRATED_COLUMN + 1];
 	int consistencies[LAST_CALIBRATED_COLUMN + 1];
 	int i;
@@ -197,7 +215,12 @@ list(int)* find_consistent_peak_columns(list(Trial)* data,
 	for (i = 0; i < requested_quantity; i++) {
 		list_add_int(top, cols[i]);
 	}
-	analysis_coerce_peaks(data, chosen, top);
+	for (i = 0; i < top->size; i++) {
+		printf("The %dth most consistent column is %d\n", i + 1,
+				top->values[i]);
+	}
+	analysis_coerce_peaks(data, chosen, top,
+			reject_nonstandardly_patterned_peaks);
 	int j;
 	for (j = 0; j <= LAST_CALIBRATED_COLUMN; j++) {
 		free(chosen[j].values);
@@ -205,49 +228,83 @@ list(int)* find_consistent_peak_columns(list(Trial)* data,
 	return top;
 }
 
-void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols) {
+list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
+		NDS* data) {
+	list(double) *all_peak_times = list_new_double();
+	int i;
+	for (i = 0; i < consistent_peaks->size; i++) {
+		list(Peak) *current_peaks = (tr->cols)[consistent_peaks->values[i]];
+		int peak;
+		for (peak = 0; peak < current_peaks->size; peak++) {
+			list_add_double(all_peak_times, current_peaks->values[peak].t);
+		}
+	}
+	list_add_double(all_peak_times, data->data.values[data->ind_start].t);
+	list_add_double(all_peak_times, data->data.values[data->ind_end - 1].t);
+	printf("ALL PEAKS:\n");
+	list_print_double(all_peak_times, render_double);
+	qsort(all_peak_times->values, all_peak_times->size, sizeof(double),
+			cmp_double);
+	list(double) *all_filtered_peak_times = list_new_double();
+	for (i = 0; i < all_peak_times->size; i++) {
+		if (i != all_peak_times->size - 1
+				&& all_peak_times->values[i] == all_peak_times->values[i + 1])
+			continue;
+		list_add_double(all_filtered_peak_times, all_peak_times->values[i]);
+	}
+	printf("ALL PEAKS SORTED:\n");
+	list_print_double(all_peak_times, render_double);
+	list_free_double(all_peak_times);
+	return all_filtered_peak_times;
+
+}
+
+void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
+		int reject_nonstandardly_patterned_peaks) {
 	list(int) *consistent_peaks = find_consistent_peak_columns(lTrials,
-			ncols);
+			ncols, reject_nonstandardly_patterned_peaks);
 	int nTrial;
 	for (nTrial = 0; nTrial < lTrials->size; nTrial++) {
-		list(double) *all_peak_times = list_new_double();
 		Trial* tr = &(lTrials->values[nTrial]);
 		NDS* data = &(tr->data);
-		int i;
-		for (i = 0; i < consistent_peaks->size; i++) {
-			list(Peak) *current_peaks =
-					(tr->cols)[consistent_peaks->values[i]];
-			int peak;
-			for (peak = 0; peak < current_peaks->size; peak++) {
-				list_add_double(all_peak_times, current_peaks->values[peak].t);
+		list(double) *all_peak_times = find_all_peak_times(consistent_peaks,
+				tr, data);
+		double calc_segdt(int seg) {
+			return all_peak_times->values[seg + 1] - all_peak_times->values[seg];
+		}
+		void segdt_loop(double *(loc_of_t)(int i), int num_i) {
+			int seg = 0;
+			double segdt = calc_segdt(seg);
+			int i;
+			for (i = 0; i < num_i; i++) {
+				double* t = loc_of_t(i);
+				while (seg + 1 < all_peak_times->size
+						&& *t >= all_peak_times->values[seg + 1]) {
+					seg++;
+					segdt = calc_segdt(seg);
+				}
+				*t = ((*t - all_peak_times->values[seg]) / segdt + (double) seg)
+						/ (double) (all_peak_times->size - 1);
 			}
 		}
-		list_add_double(all_peak_times, data->data.values[data->ind_start].t);
-		list_add_double(all_peak_times, data->data.values[data->ind_end - 1].t);
-		qsort(all_peak_times->values, all_peak_times->size, sizeof(double),
-				cmp_double);
-		int seg = 0;
-		double segdt = all_peak_times->values[seg + 1]
-				- all_peak_times->values[seg];
-		for (i = data->ind_start; i < data->ind_end; i++) {
-			CalibratedData *row = &data->data.values[i];
-			if (seg + 1 < all_peak_times->size
-					&& row->t >= all_peak_times->values[seg + 1]) {
-				while (all_peak_times->values[seg + 1]
-						== all_peak_times->values[seg])
-					seg++;
-				segdt = all_peak_times->values[seg + 1]
-						- all_peak_times->values[seg];
+		double *loc_of_t_in_NDS(int i) {
+			return &data->data.values[i + data->ind_start].t;
+		}
+		segdt_loop(loc_of_t_in_NDS, data->ind_end - data->ind_start);
+		int col;
+		for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
+			double *loc_of_t_in_Peak(int i) {
+				return &tr->cols[col]->values[i].t;
 			}
-			row->t = ((row->t - all_peak_times->values[seg]) / segdt
-					+ (double) seg) / (double) all_peak_times->size;
-			if (isinf(row->t)) {
-				printf(
-						"IS inf row->t; all_peak_times = %d; seg = %d; segdt = %f\n",
-						all_peak_times->size, seg, segdt);
-			}
+			segdt_loop(loc_of_t_in_Peak, tr->cols[col]->size);
 		}
 		list_free_double(all_peak_times);
 	}
 	list_free_int(consistent_peaks);
+	int i;
+	for (i = 0; i < lTrials->size; i++) {
+		CalibratedDataList ref = dataset_nds_to_cdl(lTrials->values[i].data);
+		ref.is_normalized = 0;
+		analysis_normalize(&ref);
+	}
 }

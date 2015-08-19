@@ -5,8 +5,8 @@
  *      Author: root
  */
 
-#ifndef PROCESSOR_AFTERTHEFACT_H_
-#define PROCESSOR_AFTERTHEFACT_H_
+#ifndef PROCESSOR_CURVE_DEFINER_H_
+#define PROCESSOR_CURVE_DEFINER_H_
 
 /**
  * Processes the content folder. If the folder does not contain a file
@@ -15,4 +15,4 @@
  */
 void process_content_folder(char* dir);
 
-#endif /* PROCESSOR_AFTERTHEFACT_H_ */
+#endif /* PROCESSOR_CURVE_DEFINER_H_ */

@@ -10,6 +10,7 @@
 
 char* utils_concat(char* a, char* b);
 int cmp_double(const void* a, const void* b);
+char* render_double(double d);
 /**
  * Applies the given function to every path in the given directory
  */

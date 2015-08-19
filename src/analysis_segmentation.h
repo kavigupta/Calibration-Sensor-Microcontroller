@@ -20,6 +20,6 @@
  *
  * ncols === number of columns to use
  */
-void analysis_scale_by_peaks(list(Trial)* data, int ncols);
+void analysis_scale_by_peaks(list(Trial)* data, int ncols, int reject_nonstandardly_patterned_peaks);
 
 #endif /* ANALYSIS_SEGMENTATION_H_ */

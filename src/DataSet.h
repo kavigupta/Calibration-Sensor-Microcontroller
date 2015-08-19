@@ -8,10 +8,9 @@
 #ifndef DATASET_H_
 #define DATASET_H_
 
-#include "Vector.h"
 #include "generics.h"
-#include "stdlib.h"
 #include "list.h"
+#include "Vector.h"
 
 #define LAST_CALIBRATED_COLUMN MAG_THETA
 
@@ -67,10 +66,21 @@ import_header(list, NDS);
 
 typedef struct {
 	NDS data;
-	list(Peak) *cols[9];
+	list(Peak) *cols[LAST_CALIBRATED_COLUMN + 1];
 } Trial;
 import_header(list, Trial);
 
+typedef struct {
+	double mu, sigma;
+} Distribution;
+import_header(list, Distribution);
+
+typedef struct {
+	list(Distribution) *distributions[LAST_CALIBRATED_COLUMN + 1];
+	list(int) *calibration_columns;
+	list(list(Peak)) *calibration_signatures;
+	int n_samples;
+} Match;
 
 list(JoinedData) dataset_combine_vector4(Vector4* mag, int magl,
 		Vector4* gyr, int gryl, Vector4* acl, int acll, double dt);
@@ -89,4 +99,9 @@ double *dataset_column_get_field(CalibratedData* data, CalibratedColumn column);
 char* dataset_column_render(CalibratedColumn column);
 
 double dataset_nds_duration(NDS nds);
+
+void dataset_free_trial(Trial tr);
+
+CalibratedDataList dataset_nds_to_cdl(NDS nds);
+
 #endif /* DATASET_H_ */

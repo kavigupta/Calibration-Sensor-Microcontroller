@@ -18,6 +18,13 @@ char* utils_concat(char* a, char* b) {
 	return mem;
 }
 
+char* render_double(double d) {
+	char* c = malloc(40);
+	c[0] = '\0';
+	sprintf(c, "%f", d);
+	return c;
+}
+
 int cmp_double(const void* _a, const void* _b) {
 	const double* a = _a;
 	const double* b = _b;

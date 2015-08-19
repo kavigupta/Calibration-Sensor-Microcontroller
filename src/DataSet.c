@@ -8,6 +8,7 @@
 #include "DataSet.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -22,9 +23,10 @@ import_body(list, Peak);
 import_body(list, list(Peak));
 import_body(list, NDS);
 import_body(list, Trial);
+import_body(list, Distribution);
 
-list(JoinedData) dataset_combine_vector4(Vector4* mag, int magl, Vector4* gyr,
-		int gyrl, Vector4* acl, int acll, double dt) {
+list(JoinedData) dataset_combine_vector4(Vector4* mag, int magl,
+		Vector4* gyr, int gyrl, Vector4* acl, int acll, double dt) {
 	int im = 0, ig = 0, ia = 0;
 	int size = 0, capacity = 10;
 	JoinedData* set = malloc(capacity * sizeof(JoinedData));
@@ -146,4 +148,20 @@ char* dataset_column_render(CalibratedColumn column) {
 
 double dataset_nds_duration(NDS nds) {
 	return nds.data.values[nds.ind_end].t - nds.data.values[nds.ind_start].t;
+}
+
+void dataset_free_trial(Trial tr) {
+	int j;
+	for (j = 0; j <= LAST_CALIBRATED_COLUMN; j++) {
+		list_free_Peak(tr.cols[j]);
+	}
+}
+
+CalibratedDataList dataset_nds_to_cdl(NDS nds) {
+	CalibratedDataList cdl;
+	cdl.values = nds.data.values + nds.ind_start;
+	cdl.len = nds.ind_end - nds.ind_start;
+	cdl.is_normalized = nds.data.is_normalized;
+	cdl.is_smoothed = nds.data.is_smoothed;
+	return cdl;
 }

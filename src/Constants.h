@@ -19,6 +19,8 @@
 #define COLS_USED_FOR_PEAK_DET 1
 #define REMOVE_NONSTANDARD_COLS 1
 
+#define SAMPLES_PER_SEGMENT 2
+
 int smoothing_radius_index(CalibratedDataList* data);
 
 #endif /* CONSTANTS_H_ */

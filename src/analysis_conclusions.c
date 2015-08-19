@@ -10,6 +10,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "DataSet.h"
 #include "generics.h"
@@ -28,9 +29,10 @@ import_body(list, Samples);
  */
 static Samples analysis_sample_points(Trial trial, int n_samples);
 
-Match analysis_generate_match(list(Trial)* trials, list(int)* consistent_cols,
-list(list(Peak))* signatures, int n_samples) {
-	Match match;
+CurveDefinition analysis_generate_match(list(Trial)* trials,
+list(int)* consistent_cols,
+list(list(int))* signatures, int n_samples) {
+	CurveDefinition match;
 	match.n_samples = n_samples;
 	match.calibration_columns = consistent_cols;
 	match.calibration_signatures = signatures;
@@ -47,12 +49,12 @@ list(list(Peak))* signatures, int n_samples) {
 	}
 	for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
 		int point;
-		for (point = 0;; point++) {
+		for (point = 0; point < n_samples; point++) {
 			double sum = 0;
 			for (nTrial = 0; nTrial < all_samples->size; nTrial++) {
 				sum += all_samples->values[nTrial].cols[col][point];
 			}
-			double mu = sum / all_samples->values[nTrial].n_samples;
+			double mu = sum / n_samples;
 			double var = 0;
 			for (nTrial = 0; nTrial < all_samples->size; nTrial++) {
 				all_samples->values[nTrial].cols[col][point] -= mu;
@@ -77,14 +79,23 @@ static Samples analysis_sample_points(Trial trial, int n_samples) {
 		int i;
 		// loop to replace the time indeces with values
 		for (i = trial.data.ind_start; i < trial.data.ind_end; i++) {
-			while (values[i].t * n_samples <= cur_sample)
+			int br = 0;
+			while (values[i].t * n_samples <= cur_sample) {
 				i++;
+				if (i >= trial.data.ind_end) {
+					br = 1;
+					break;
+				}
+			}
+			if (br)
+				break;
 			double t1 = values[i - 1].t, t2 = values[i].t;
 			double v1 = *dataset_column_get_field(&values[i - 1], col);
 			double v2 = *dataset_column_get_field(&values[i], col);
 			double m = (v2 - v1) / (t2 - t1);
 			// (v - v1) = m (t - t1)
 			double t = (double) cur_sample / (double) n_samples;
+			assert(cur_sample < n_samples);
 			samples[col][cur_sample] = v1 + m * (t - t1);
 			cur_sample++;
 		}
@@ -93,5 +104,6 @@ static Samples analysis_sample_points(Trial trial, int n_samples) {
 	for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
 		smp.cols[col] = samples[col];
 	}
+	smp.n_samples = n_samples;
 	return smp;
 }

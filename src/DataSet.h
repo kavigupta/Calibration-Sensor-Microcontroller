@@ -20,6 +20,7 @@ import_header(list, int);
 import_header(list, long);
 import_header(list, double);
 import_header(list, void_ptr);
+import_header(list, list(int));
 
 typedef struct {
 	double t;
@@ -78,9 +79,9 @@ import_header(list, Distribution);
 typedef struct {
 	list(Distribution) *distributions[LAST_CALIBRATED_COLUMN + 1];
 	list(int) *calibration_columns;
-	list(list(Peak)) *calibration_signatures;
+	list(list(int)) *calibration_signatures;
 	int n_samples;
-} Match;
+} CurveDefinition;
 
 list(JoinedData) dataset_combine_vector4(Vector4* mag, int magl,
 		Vector4* gyr, int gryl, Vector4* acl, int acll, double dt);

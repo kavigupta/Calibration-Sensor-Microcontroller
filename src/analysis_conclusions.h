@@ -16,7 +16,8 @@
  * consistent, a list of the signatures corresponding to those columns,
  * and how many samples are requested.
  */
-Match analysis_generate_match(list(Trial)* trials, list(int)* consistent_cols,
-list(list(Peak))* signatures, int n_samples);
+CurveDefinition analysis_generate_match(list(Trial)* trials,
+list(int)* consistent_cols,
+list(list(int))* signatures, int n_samples);
 
 #endif /* ANALYSIS_CONCLUSIONS_H_ */

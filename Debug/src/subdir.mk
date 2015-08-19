@@ -19,7 +19,8 @@ C_SRCS += \
 ../src/analysis_preprocessing.c \
 ../src/analysis_segmentation.c \
 ../src/analysis_trial_separation.c \
-../src/processor_afterthefact.c 
+../src/processor_curve_definer.c \
+../src/processor_decision.c 
 
 OBJS += \
 ./src/Constants.o \
@@ -37,7 +38,8 @@ OBJS += \
 ./src/analysis_preprocessing.o \
 ./src/analysis_segmentation.o \
 ./src/analysis_trial_separation.o \
-./src/processor_afterthefact.o 
+./src/processor_curve_definer.o \
+./src/processor_decision.o 
 
 C_DEPS += \
 ./src/Constants.d \
@@ -55,7 +57,8 @@ C_DEPS += \
 ./src/analysis_preprocessing.d \
 ./src/analysis_segmentation.d \
 ./src/analysis_trial_separation.d \
-./src/processor_afterthefact.d 
+./src/processor_curve_definer.d \
+./src/processor_decision.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

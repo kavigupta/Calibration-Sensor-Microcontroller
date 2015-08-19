@@ -12,6 +12,12 @@
 #include "Vector.h"
 #include "DataSet.h"
 
+typedef struct {
+	int n_peaks;
+	list(int)* consistent_cols;
+	list(list(int))* used_signatures;
+} PeakScalingParameters;
+
 /**
  * Scales the given trials' timestamps by their most consistent peaks
  * so that the trials' timestamps are correlated by the time within a
@@ -19,7 +25,10 @@
  * correspond to points in an action rather than in absolute time.
  *
  * ncols === number of columns to use
+ *
+ * Returns which peaks were used to arrive at its conclusion.
  */
-void analysis_scale_by_peaks(list(Trial)* data, int ncols, int reject_nonstandardly_patterned_peaks);
+PeakScalingParameters analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
+		int reject_nonstandardly_patterned_peaks);
 
 #endif /* ANALYSIS_SEGMENTATION_H_ */

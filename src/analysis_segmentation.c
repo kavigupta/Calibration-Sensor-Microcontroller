@@ -190,7 +190,7 @@ list(int) *top, int reject_nonstandardly_patterned_peaks) {
 /**
  * Finds columns which contain the most consistent peaks.
  */
-list(int)* find_consistent_peak_columns(list(Trial)* data,
+PeakScalingParameters find_consistent_peak_columns(list(Trial)* data,
 		int requested_quantity, int reject_nonstandardly_patterned_peaks) {
 	int cols[LAST_CALIBRATED_COLUMN + 1];
 	int consistencies[LAST_CALIBRATED_COLUMN + 1];
@@ -212,8 +212,18 @@ list(int)* find_consistent_peak_columns(list(Trial)* data,
 	qsort(cols, LAST_CALIBRATED_COLUMN + 1, sizeof(int),
 			compare_cols_by_consistency);
 	list(int)* top = list_new_int();
+	list(list(int))* sigs = list_new_list__int();
+	int n_peaks = 0;
 	for (i = 0; i < requested_quantity; i++) {
 		list_add_int(top, cols[i]);
+		list(int) *sig = list_new_int();
+		int j;
+		for (j = 0; j < chosen[cols[i]].size; j++) {
+			list_add_int(sig, chosen[cols[i]].values[j].is_positive_peak);
+			n_peaks++;
+		}
+		list_add_list__int(sigs, *sig);
+		free(sig);
 	}
 	for (i = 0; i < top->size; i++) {
 		printf("The %dth most consistent column is %d\n", i + 1,
@@ -225,7 +235,9 @@ list(int)* find_consistent_peak_columns(list(Trial)* data,
 	for (j = 0; j <= LAST_CALIBRATED_COLUMN; j++) {
 		free(chosen[j].values);
 	}
-	return top;
+	PeakScalingParameters psp = { .consistent_cols = top, .used_signatures =
+			sigs, .n_peaks = n_peaks };
+	return psp;
 }
 
 list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
@@ -259,16 +271,16 @@ list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
 
 }
 
-void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
+PeakScalingParameters analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
 		int reject_nonstandardly_patterned_peaks) {
-	list(int) *consistent_peaks = find_consistent_peak_columns(lTrials,
-			ncols, reject_nonstandardly_patterned_peaks);
+	PeakScalingParameters params = find_consistent_peak_columns(lTrials, ncols,
+			reject_nonstandardly_patterned_peaks);
 	int nTrial;
 	for (nTrial = 0; nTrial < lTrials->size; nTrial++) {
 		Trial* tr = &(lTrials->values[nTrial]);
 		NDS* data = &(tr->data);
-		list(double) *all_peak_times = find_all_peak_times(consistent_peaks,
-				tr, data);
+		list(double) *all_peak_times = find_all_peak_times(
+				params.consistent_cols, tr, data);
 		double calc_segdt(int seg) {
 			return all_peak_times->values[seg + 1] - all_peak_times->values[seg];
 		}
@@ -300,11 +312,11 @@ void analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
 		}
 		list_free_double(all_peak_times);
 	}
-	list_free_int(consistent_peaks);
 	int i;
 	for (i = 0; i < lTrials->size; i++) {
 		CalibratedDataList ref = dataset_nds_to_cdl(lTrials->values[i].data);
 		ref.is_normalized = 0;
 		analysis_normalize(&ref);
 	}
+	return params;
 }

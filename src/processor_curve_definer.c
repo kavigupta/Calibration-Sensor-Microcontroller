@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "analysis_conclusions.h"
 #include "analysis_peakfind.h"
 #include "analysis_preprocessing.h"
 #include "analysis_segmentation.h"
@@ -20,10 +21,6 @@
 #include "IO.h"
 #include "list.h"
 #include "Utils.h"
-
-/**
- * Reads
- */
 
 typedef struct {
 	list(Trial)* data;
@@ -105,25 +102,30 @@ void process_content_folder(char* dir) {
 	printf("Attempting to Calculate Peaks for %s\n", dir);
 	CleanableTrialList read = read_all_datasets(dir);
 	list(Trial)* trials = read.data;
-	char* psplit = utils_concat(dir, "/split.csv");
+	char* psplit = utils_concat(dir, "/data_split.csv");
 	char* output = utils_concat(dir, "/peaks.csv");
 	io_write_normalized_data_segment_list(psplit, output, trials);
 	free(psplit);
 	free(output);
-	analysis_scale_by_peaks(trials, COLS_USED_FOR_PEAK_DET,
+	PeakScalingParameters params = analysis_scale_by_peaks(trials,
+	COLS_USED_FOR_PEAK_DET,
 	REMOVE_NONSTANDARD_COLS);
-	if (trials->size > 0)
-		printf("Starting t = %f\n",
-				trials->values[0].data.data.values[trials->values[0].data.ind_start
-						+ 1].t);
-	char* psplit_stretched = utils_concat(dir, "/split_stretched.csv");
-	char* output_stretched = utils_concat(dir, "/peaks_stretched.csv");
-	io_write_normalized_data_segment_list(psplit_stretched, output_stretched,
-			trials);
+	char* psplit_stretched = utils_concat(dir, "/data_stretched.csv");
+	io_write_normalized_data_segment_list(psplit_stretched, NULL, trials);
 	free(psplit_stretched);
-	free(output_stretched);
-	printf("Written all files\n");
+	CurveDefinition def = analysis_generate_match(trials,
+			params.consistent_cols, params.used_signatures,
+			params.n_peaks * SAMPLES_PER_SEGMENT);
+	char* conclusions = utils_concat(dir, "/conclusions.csv");
+	io_write_curve_definition(conclusions, def);
+	free(conclusions);
+	list_free_int(def.calibration_columns);
 	int i;
+	for (i = 0; i < def.calibration_signatures->size; i++) {
+		free(def.calibration_signatures->values[i].values);
+	}
+	list_free_list__int(def.calibration_signatures);
+	printf("Written all files\n");
 	for (i = 0; i < trials->size; i++) {
 		dataset_free_trial(trials->values[i]);
 	}

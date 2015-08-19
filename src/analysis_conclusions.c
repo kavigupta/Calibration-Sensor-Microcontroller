@@ -52,8 +52,13 @@ list(list(int))* signatures, int n_samples) {
 		for (point = 0; point < n_samples; point++) {
 			double sum = 0;
 			for (nTrial = 0; nTrial < all_samples->size; nTrial++) {
+				if (col == 0)
+					printf("%f\t",
+							all_samples->values[nTrial].cols[col][point]);
 				sum += all_samples->values[nTrial].cols[col][point];
 			}
+			if (col == 0)
+				printf("\n");
 			double mu = sum / n_samples;
 			double var = 0;
 			for (nTrial = 0; nTrial < all_samples->size; nTrial++) {
@@ -61,7 +66,8 @@ list(list(int))* signatures, int n_samples) {
 				var += all_samples->values[nTrial].cols[col][point]
 						* all_samples->values[nTrial].cols[col][point];
 			}
-			Distribution dist = { .mu = mu, .sigma = sqrt(var) };
+			Distribution dist =
+					{ .mu = mu, .sigma = sqrt(var / (n_samples - 1)) };
 			list_add_Distribution(match.distributions[col], dist);
 		}
 	}

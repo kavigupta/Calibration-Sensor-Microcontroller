@@ -181,6 +181,7 @@ void io_write_curve_definition(char* path, CurveDefinition cd) {
 		fprintf(file, "\n");
 	}
 	int col;
+	fprintf(file, "Time,");
 	for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
 		char* rendering = dataset_column_render(col);
 		fprintf(file, "%s (mu), %s (sigma),", rendering, rendering);
@@ -188,6 +189,7 @@ void io_write_curve_definition(char* path, CurveDefinition cd) {
 	fprintf(file, "\n");
 	int j;
 	for (j = 0; j < cd.n_samples; j++) {
+		fprintf(file, "%f,", (double) j / cd.n_samples);
 		for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
 			fprintf(file, "%f,%f,", cd.distributions[col]->values[j].mu,
 					cd.distributions[col]->values[j].sigma);
@@ -227,10 +229,11 @@ CurveDefinition io_read_curve_definition(char* path) {
 	// already ignored the distr declaration
 	int j;
 	for (j = 0; j < cd.n_samples; j++) {
-		fgets(buffer, 10000, file);
+		double todiscard;
+		fscanf(file, "%lf,", &todiscard);
 		for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
 			Distribution ds = { };
-			sscanf(buffer, "%lf,%lf,", &ds.mu, &ds.sigma);
+			fscanf(file, "%lf,%lf,", &ds.mu, &ds.sigma);
 			list_add_Distribution(cd.distributions[col], ds);
 		}
 		fprintf(file, "\n");

@@ -15,7 +15,6 @@
 #include "Matrix.h"
 #include "Vector.h"
 
-
 CalibratedDataList analysis_calibrate(list(JoinedData) data) {
 	CalibratedData* cals = malloc(data.size * sizeof(*cals));
 	int i = 0;
@@ -86,7 +85,7 @@ void analysis_normalize(CalibratedDataList* data) {
 			double dev = *dataset_column_get_field(&(data->values[i]), column);
 			var += dev * dev;
 		}
-		double sigma = sqrt(var);
+		double sigma = sqrt(var / (data->len - 1));
 		if (sigma == 0)
 			continue;
 		for (i = 0; i < data->len; i++) {

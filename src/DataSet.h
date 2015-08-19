@@ -27,6 +27,8 @@ typedef struct {
 	Vector acl, gyr, mag;
 } JoinedData;
 import_header(list, JoinedData);
+import_header(list, list(JoinedData));
+
 
 typedef struct {
 	double t;
@@ -46,6 +48,8 @@ typedef struct {
 	int len;
 	CalibratedData* values;
 } CalibratedDataList;
+
+import_header(list, CalibratedDataList);
 
 typedef enum {
 	ACL_X, ACL_Y, ACL_Z, GYR_X, GYR_Y, GYR_Z, MAG_R, MAG_PHI, MAG_THETA

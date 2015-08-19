@@ -8,7 +8,6 @@
 #ifndef LIST_H_
 #define LIST_H_
 
-
 #define list(type) __(list, type)
 
 #define list_setup(list, type)\
@@ -22,6 +21,7 @@
 		void list_set_##type(list* li, int loc, type el);\
 		type list_get_##type(list* li, int loc);\
 		void list_add_##type(list* li, type el);\
+		void list_add_all_##type(list* li, list* to_add);\
 		list* list_clone_##type(list* li);\
 		void list_print_##type(list* li, char* (render)(type t));\
 		void list_free_##type(list* li);\
@@ -49,6 +49,12 @@
 			}\
 			li->values[li->size] = el;\
 			li->size++;\
+		}\
+		void list_add_all_##type(list* li, list* to_add){\
+			int i;\
+			for(i = 0; i<to_add->size; i++){\
+				list_add_##type(li, to_add->values[i]);\
+			}\
 		}\
 		list* list_clone_##type(list* li){\
 			int i;\

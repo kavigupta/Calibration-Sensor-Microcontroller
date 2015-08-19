@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "Constants.h"
 #include "Controller.h"
 #include "IO.h"
 #include "list.h"
@@ -22,7 +23,10 @@ int main() {
 	free(calibration.values);
 	char* dir_string =
 			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data";
-	foreach_in_dir(dir_string, process_content_folder);
+	void process_dir(char* dir) {
+		process_content_folder(dir, DEFAULT_PARAMETERS);
+	}
+	foreach_in_dir(dir_string, process_dir);
 //	char* path =
 //			"/home/kavi/Dropbox/workspaces/C/Magnetometer Processor/data/doorknob-good";
 //	process_content_folder(path);

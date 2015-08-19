@@ -10,6 +10,6 @@
 
 #include "DataSet.h"
 
-int processor_matches(CurveDefinition curve, Trial t);
+int processor_matches(CurveDefinition curve, NDS t);
 
 #endif /* PROCESSOR_DECISION_H_ */

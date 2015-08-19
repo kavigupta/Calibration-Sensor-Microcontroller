@@ -33,10 +33,10 @@ CalibratedDataList analysis_calibrate(list(JoinedData) data) {
 }
 
 void analysis_smooth(CalibratedDataList* data) {
-	double* runningTotal = malloc(data->len * sizeof(double));
-	data->len--;
 	if (data->is_smoothed)
 		return;
+	double* runningTotal = malloc(data->len * sizeof(double));
+	data->len--;
 	int column;
 	for (column = 0; column <= LAST_CALIBRATED_COLUMN; column++) {
 		double coldt(int i) {

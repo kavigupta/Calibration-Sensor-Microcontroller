@@ -13,6 +13,7 @@ C_SRCS += \
 ../src/Test.c \
 ../src/Utils.c \
 ../src/Vector.c \
+../src/analysis.c \
 ../src/analysis_conclusions.c \
 ../src/analysis_peakfind.c \
 ../src/analysis_peaktools.c \
@@ -33,6 +34,7 @@ OBJS += \
 ./src/Test.o \
 ./src/Utils.o \
 ./src/Vector.o \
+./src/analysis.o \
 ./src/analysis_conclusions.o \
 ./src/analysis_peakfind.o \
 ./src/analysis_peaktools.o \
@@ -53,6 +55,7 @@ C_DEPS += \
 ./src/Test.d \
 ./src/Utils.d \
 ./src/Vector.d \
+./src/analysis.d \
 ./src/analysis_conclusions.d \
 ./src/analysis_peakfind.d \
 ./src/analysis_peaktools.d \

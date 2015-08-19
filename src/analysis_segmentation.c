@@ -18,7 +18,7 @@
 #include "list.h"
 #include "Utils.h"
 
-void analysis_find_unique_signatures(list(Trial)* data, int col,
+static void analysis_find_unique_signatures(list(Trial)* data, int col,
 list(list(Peak))** signatures, list(int)** sigcounts) {
 	*signatures = list_new_list__Peak();
 	*sigcounts = list_new_int();
@@ -60,7 +60,7 @@ list(list(Peak))** signatures, list(int)** sigcounts) {
 	}
 }
 
-int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
+static int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 	list(list(Peak))* signatures;
 	list(int)* sigcounts;
 	analysis_find_unique_signatures(data, col, &signatures, &sigcounts);
@@ -91,7 +91,7 @@ int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
 	return consistency;
 }
 
-int analysis_coerce_peaks_within_column(Trial* tr, int col,
+static int analysis_coerce_peaks_within_column(Trial* tr, int col,
 list(Peak)* standard, int reject_nonstandardly_patterned_peaks) {
 	if (analysis_peaklists_same_pattern(standard, tr->cols[col], 1, 0)) {
 		// no coersion necessary
@@ -163,7 +163,7 @@ list(Peak)* standard, int reject_nonstandardly_patterned_peaks) {
 	return 1;
 }
 
-void analysis_coerce_peaks(list(Trial)* data,
+static void analysis_coerce_peaks(list(Trial)* data,
 list(Peak) chosen[LAST_CALIBRATED_COLUMN + 1],
 list(int) *top, int reject_nonstandardly_patterned_peaks) {
 	int i;
@@ -190,7 +190,7 @@ list(int) *top, int reject_nonstandardly_patterned_peaks) {
 /**
  * Finds columns which contain the most consistent peaks.
  */
-PeakScalingParameters find_consistent_peak_columns(list(Trial)* data,
+static PeakScalingParameters find_consistent_peak_columns(list(Trial)* data,
 		int requested_quantity, int reject_nonstandardly_patterned_peaks) {
 	int cols[LAST_CALIBRATED_COLUMN + 1];
 	int consistencies[LAST_CALIBRATED_COLUMN + 1];
@@ -240,7 +240,7 @@ PeakScalingParameters find_consistent_peak_columns(list(Trial)* data,
 	return psp;
 }
 
-list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
+static list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
 		NDS* data) {
 	list(double) *all_peak_times = list_new_double();
 	int i;

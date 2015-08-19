@@ -18,10 +18,8 @@
 /**
  * Calculates the sum over every row of the square of the difference of each
  * element and the element in the next column.
- *
- * Defined here so that it is a private method to this module
  */
-double* analysis_get_diff_trace(CalibratedDataList* data);
+static double* analysis_get_diff_trace(CalibratedDataList* data);
 
 list(NDS)* analysis_split_data(CalibratedDataList* data, double jumpConstant,
 		double minimumDuration) {
@@ -89,7 +87,7 @@ list(NDS)* analysis_split_data(CalibratedDataList* data, double jumpConstant,
 	return onlyMovement;
 }
 
-double* analysis_get_diff_trace(CalibratedDataList* data) {
+static double* analysis_get_diff_trace(CalibratedDataList* data) {
 	if (!data->is_normalized)
 		analysis_normalize(data);
 	CalibratedDataList diffs =

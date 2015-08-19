@@ -65,6 +65,13 @@ list(list(int))* signatures, int n_samples) {
 			list_add_Distribution(match.distributions[col], dist);
 		}
 	}
+	int i;
+	for (i = 0; i < all_samples->size; i++) {
+		int col;
+		for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
+			free(all_samples->values[i].cols[col]);
+		}
+	}
 	list_free_Samples(all_samples);
 	return match;
 }

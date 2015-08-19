@@ -253,8 +253,6 @@ list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
 	}
 	list_add_double(all_peak_times, data->data.values[data->ind_start].t);
 	list_add_double(all_peak_times, data->data.values[data->ind_end - 1].t);
-	printf("ALL PEAKS:\n");
-	list_print_double(all_peak_times, render_double);
 	qsort(all_peak_times->values, all_peak_times->size, sizeof(double),
 			cmp_double);
 	list(double) *all_filtered_peak_times = list_new_double();
@@ -264,8 +262,6 @@ list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
 			continue;
 		list_add_double(all_filtered_peak_times, all_peak_times->values[i]);
 	}
-	printf("ALL PEAKS SORTED:\n");
-	list_print_double(all_peak_times, render_double);
 	list_free_double(all_peak_times);
 	return all_filtered_peak_times;
 

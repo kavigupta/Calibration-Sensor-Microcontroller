@@ -125,6 +125,9 @@ void process_content_folder(char* dir) {
 		free(def.calibration_signatures->values[i].values);
 	}
 	list_free_list__int(def.calibration_signatures);
+	for (i = 0; i <= LAST_CALIBRATED_COLUMN; i++) {
+		list_free_Distribution(def.distributions[i]);
+	}
 	printf("Written all files\n");
 	for (i = 0; i < trials->size; i++) {
 		dataset_free_trial(trials->values[i]);

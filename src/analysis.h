@@ -28,4 +28,6 @@ typedef struct {
 CurveDefinitionTrace analysis_define_curve(list(list(JoinedData)) joined,
 		CurveDefinitionParameters params);
 
+int processor_matches(CurveDefinition curve, NDS t);
+
 #endif /* ANALYSIS_H_ */

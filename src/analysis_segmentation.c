@@ -91,7 +91,7 @@ static int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* cho
 	return consistency;
 }
 
-static int analysis_coerce_peaks_within_column(Trial* tr, int col,
+int analysis_coerce_peaks_for_single_trial(Trial* tr, int col,
 list(Peak)* standard, int reject_nonstandardly_patterned_peaks) {
 	if (analysis_peaklists_same_pattern(standard, tr->cols[col], 1, 0)) {
 		// no coersion necessary
@@ -173,7 +173,7 @@ list(int) *top, int reject_nonstandardly_patterned_peaks) {
 		list(Peak) *used = &chosen[col];
 		int j;
 		for (j = 0; j < data->size; j++) {
-			int valid = analysis_coerce_peaks_within_column(&data->values[j],
+			int valid = analysis_coerce_peaks_for_single_trial(&data->values[j],
 					col, used, reject_nonstandardly_patterned_peaks);
 			if (!valid) {
 				dataset_free_trial(data->values[j]);

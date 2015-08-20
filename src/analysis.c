@@ -16,6 +16,105 @@
 #include "analysis_trial_separation.h"
 #include "list.h"
 
+int processor_matches(CurveDefinition curve, NDS t) {
+	// a list of possibilities for the given trial
+	Trial tr;
+	{
+		list(NDS) *nds_pass = list_new_NDS();
+		list(Trial) *poss = analysis_peak_find_all(nds_pass, 0);
+		if (poss->size < 1) {
+			list_free_NDS(nds_pass);
+			list_free_Trial(poss);
+			return 0;
+		}
+		tr = poss->values[0];
+		list_free_NDS(nds_pass);
+		list_free_Trial(poss);
+	}
+	int i;
+	list(list(int)) *offsets = list_new_list__int();
+	{
+		list(int) *empty = list_new_int();
+		list_add_list__int(offsets, *empty);
+		free(empty);
+	}
+	for (i = 0; i < curve.calibration_columns->size; i++) {
+		list(list(int)) *offsets_next = list_new_list__int();
+		int col = curve.calibration_columns->values[i];
+		list(int) *expected = &curve.calibration_signatures->values[i];
+		list(Peak) *actual = tr.cols[col];
+		if (actual->size < expected->size) {
+			offsets->size = 0;
+			break;
+		}
+		int off = 0;
+		for (off = 0; off <= actual->size - expected->size; off++) {
+			int works = 1;
+			int peak;
+			for (peak = 0; peak < expected->size; peak++) {
+				if (actual->values[peak + off].is_positive_peak
+						!= expected->values[peak]) {
+					works = 0;
+					break;
+				}
+			}
+			if (!works)
+				continue;
+			{
+				// determine if peak span is less than half of total span
+				// If it is, the match is probably spurious.
+				double peak_span = actual->values[off + expected->size].t
+						- actual->values[off].t;
+				double total_span = tr.data.data.values[tr.data.ind_end - 1].t
+						- tr.data.data.values[tr.data.ind_start].t;
+				if (peak_span * 2 < total_span)
+					continue;
+			}
+			int k;
+			for (k = 0; k < offsets->size; k++) {
+				list(int) *ne = list_clone_int(&offsets->values[k]);
+				free(offsets->values[k].values);
+				list_add_int(ne, off);
+				list_add_list__int(offsets_next, *ne);
+				free(ne);
+			}
+			free(offsets->values);
+			*offsets = *offsets_next;
+			free(offsets_next);
+		}
+	}
+	if (offsets->size == 0)
+		return 0;
+	for (i = 0; i < offsets->size; i++) {
+		// A sequence of valid offsets.
+		int start[LAST_CALIBRATED_COLUMN + 1];
+		int end[LAST_CALIBRATED_COLUMN + 1];
+		{
+			int j;
+			for (j = 0; j <= LAST_CALIBRATED_COLUMN; j++) {
+				start[j] = 0;
+				end[j] = tr.cols[j]->size;
+			}
+			for (j = 0; j < curve.calibration_columns->size; j++) {
+				int col = curve.calibration_columns->values[j];
+				start[col] = offsets->values[i].values[j];
+				end[col] = start[col]
+						+ curve.calibration_signatures->values[j].size;
+			}
+		}
+		double chi_squared = 0;
+		int col;
+		for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
+			int peak;
+			for (peak = start[col]; peak < end[col]; peak++) {
+				tr.cols[col]->values[peak];
+			}
+		}
+	}
+// TODO unstub
+	return 0;
+}
+
 CurveDefinitionTrace analysis_define_curve(list(list(JoinedData)) joined,
 		CurveDefinitionParameters params) {
 	CurveDefinitionTrace trace;

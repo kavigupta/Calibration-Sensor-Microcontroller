@@ -81,10 +81,10 @@ typedef struct {
 import_header(list, Distribution);
 
 typedef struct {
+	int n_samples;
 	list(Distribution) *distributions[LAST_CALIBRATED_COLUMN + 1];
 	list(int) *calibration_columns;
 	list(list(int)) *calibration_signatures;
-	int n_samples;
 } CurveDefinition;
 
 list(JoinedData) dataset_combine_vector4(Vector4* mag, int magl,

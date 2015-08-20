@@ -21,7 +21,6 @@ C_SRCS += \
 ../src/analysis_segmentation.c \
 ../src/analysis_trial_separation.c \
 ../src/processor_curve_definer.c \
-../src/processor_decision.c \
 ../src/statistics.c 
 
 OBJS += \
@@ -42,7 +41,6 @@ OBJS += \
 ./src/analysis_segmentation.o \
 ./src/analysis_trial_separation.o \
 ./src/processor_curve_definer.o \
-./src/processor_decision.o \
 ./src/statistics.o 
 
 C_DEPS += \
@@ -63,7 +61,6 @@ C_DEPS += \
 ./src/analysis_segmentation.d \
 ./src/analysis_trial_separation.d \
 ./src/processor_curve_definer.d \
-./src/processor_decision.d \
 ./src/statistics.d 
 
 

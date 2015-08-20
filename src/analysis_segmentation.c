@@ -60,7 +60,8 @@ list(list(Peak))** signatures, list(int)** sigcounts) {
 	}
 }
 
-static int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* chosen) {
+static int analysis_peak_consistency(list(Trial)* data, int col,
+list(Peak)* chosen) {
 	list(list(Peak))* signatures;
 	list(int)* sigcounts;
 	analysis_find_unique_signatures(data, col, &signatures, &sigcounts);
@@ -91,7 +92,7 @@ static int analysis_peak_consistency(list(Trial)* data, int col, list(Peak)* cho
 	return consistency;
 }
 
-int analysis_coerce_peaks_for_single_trial(Trial* tr, int col,
+int analysis_coerce_peaks_for_single_column(Trial* tr, int col,
 list(Peak)* standard, int reject_nonstandardly_patterned_peaks) {
 	if (analysis_peaklists_same_pattern(standard, tr->cols[col], 1, 0)) {
 		// no coersion necessary
@@ -173,8 +174,9 @@ list(int) *top, int reject_nonstandardly_patterned_peaks) {
 		list(Peak) *used = &chosen[col];
 		int j;
 		for (j = 0; j < data->size; j++) {
-			int valid = analysis_coerce_peaks_for_single_trial(&data->values[j],
-					col, used, reject_nonstandardly_patterned_peaks);
+			int valid = analysis_coerce_peaks_for_single_column(
+					&data->values[j], col, used,
+					reject_nonstandardly_patterned_peaks);
 			if (!valid) {
 				dataset_free_trial(data->values[j]);
 			} else {
@@ -267,6 +269,45 @@ static list(double)* find_all_peak_times(list(int) *consistent_peaks, Trial* tr,
 
 }
 
+void analysis_scale_trial_by_peaks(Trial* tr, list(int)* consistent_cols) {
+	NDS* data = &(tr->data);
+	list(double) *all_peak_times = find_all_peak_times(consistent_cols, tr,
+			data);
+	double calc_segdt(int seg) {
+		return all_peak_times->values[seg + 1] - all_peak_times->values[seg];
+	}
+	void segdt_loop(double *(loc_of_t)(int i), int num_i) {
+		int seg = 0;
+		double segdt = calc_segdt(seg);
+		int i;
+		for (i = 0; i < num_i; i++) {
+			double* t = loc_of_t(i);
+			while (seg + 1 < all_peak_times->size
+					&& *t >= all_peak_times->values[seg + 1]) {
+				seg++;
+				segdt = calc_segdt(seg);
+			}
+			*t = ((*t - all_peak_times->values[seg]) / segdt + (double) seg)
+					/ (double) (all_peak_times->size - 1);
+		}
+	}
+	double *loc_of_t_in_NDS(int i) {
+		return &data->data.values[i + data->ind_start].t;
+	}
+	segdt_loop(loc_of_t_in_NDS, data->ind_end - data->ind_start);
+	int col;
+	for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
+		double *loc_of_t_in_Peak(int i) {
+			return &tr->cols[col]->values[i].t;
+		}
+		segdt_loop(loc_of_t_in_Peak, tr->cols[col]->size);
+	}
+	list_free_double(all_peak_times);
+	CalibratedDataList ref = dataset_nds_to_cdl(tr->data);
+	ref.is_normalized = 0;
+	analysis_normalize(&ref);
+}
+
 PeakScalingParameters analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
 		int reject_nonstandardly_patterned_peaks) {
 	PeakScalingParameters params = find_consistent_peak_columns(lTrials, ncols,
@@ -274,45 +315,7 @@ PeakScalingParameters analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
 	int nTrial;
 	for (nTrial = 0; nTrial < lTrials->size; nTrial++) {
 		Trial* tr = &(lTrials->values[nTrial]);
-		NDS* data = &(tr->data);
-		list(double) *all_peak_times = find_all_peak_times(
-				params.consistent_cols, tr, data);
-		double calc_segdt(int seg) {
-			return all_peak_times->values[seg + 1] - all_peak_times->values[seg];
-		}
-		void segdt_loop(double *(loc_of_t)(int i), int num_i) {
-			int seg = 0;
-			double segdt = calc_segdt(seg);
-			int i;
-			for (i = 0; i < num_i; i++) {
-				double* t = loc_of_t(i);
-				while (seg + 1 < all_peak_times->size
-						&& *t >= all_peak_times->values[seg + 1]) {
-					seg++;
-					segdt = calc_segdt(seg);
-				}
-				*t = ((*t - all_peak_times->values[seg]) / segdt + (double) seg)
-						/ (double) (all_peak_times->size - 1);
-			}
-		}
-		double *loc_of_t_in_NDS(int i) {
-			return &data->data.values[i + data->ind_start].t;
-		}
-		segdt_loop(loc_of_t_in_NDS, data->ind_end - data->ind_start);
-		int col;
-		for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
-			double *loc_of_t_in_Peak(int i) {
-				return &tr->cols[col]->values[i].t;
-			}
-			segdt_loop(loc_of_t_in_Peak, tr->cols[col]->size);
-		}
-		list_free_double(all_peak_times);
-	}
-	int i;
-	for (i = 0; i < lTrials->size; i++) {
-		CalibratedDataList ref = dataset_nds_to_cdl(lTrials->values[i].data);
-		ref.is_normalized = 0;
-		analysis_normalize(&ref);
+		analysis_scale_trial_by_peaks(tr, params.consistent_cols);
 	}
 	return params;
 }

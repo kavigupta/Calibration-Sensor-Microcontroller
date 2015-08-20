@@ -83,6 +83,7 @@ int processor_matches(CurveDefinition curve, NDS t) {
 			free(offsets_next);
 		}
 	}
+	list(Trial) *possible_trials = list_new_Trial();
 	if (offsets->size == 0)
 		return 0;
 	for (i = 0; i < offsets->size; i++) {
@@ -102,16 +103,23 @@ int processor_matches(CurveDefinition curve, NDS t) {
 						+ curve.calibration_signatures->values[j].size;
 			}
 		}
-		double chi_squared = 0;
+		Trial tr_new;
+		tr_new.data = tr.data;
 		int col;
 		for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {
+			tr_new.cols[col] = list_new_Peak();
 			int peak;
 			for (peak = start[col]; peak < end[col]; peak++) {
-				tr.cols[col]->values[peak];
+				list_add_Peak(tr_new.cols[col],
+						tr.cols[col]->values[peak - start[col]]);
 			}
 		}
+		analysis_scale_trial_by_peaks(&tr_new, curve.calibration_columns);
+		Samples tr_samp = analysis_sample_points(tr_new, curve.n_samples);
+		double p_val = statistics_composite_p(curve.distributions, tr_samp.cols);
+		list_add_Trial(possible_trials, tr_new);
 	}
-// TODO unstub
+	// TODO unstub
 	return 0;
 }
 

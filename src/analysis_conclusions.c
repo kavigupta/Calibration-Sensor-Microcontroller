@@ -16,18 +16,7 @@
 #include "generics.h"
 #include "list.h"
 
-typedef struct {
-	int n_samples;
-	double *cols[LAST_CALIBRATED_COLUMN + 1];
-} Samples;
-import_header(list, Samples);
 import_body(list, Samples);
-
-/**
- * Samples the given curve by taking n_samples points at even "t"
- * intervals
- */
-static Samples analysis_sample_points(Trial trial, int n_samples);
 
 CurveDefinition analysis_generate_match(list(Trial)* trials,
 list(int)* consistent_cols,
@@ -82,7 +71,7 @@ list(list(int))* signatures, int n_samples) {
 	return match;
 }
 
-static Samples analysis_sample_points(Trial trial, int n_samples) {
+Samples analysis_sample_points(Trial trial, int n_samples) {
 	double *samples[LAST_CALIBRATED_COLUMN + 1];
 	int col;
 	for (col = 0; col <= LAST_CALIBRATED_COLUMN; col++) {

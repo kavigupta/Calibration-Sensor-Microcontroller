@@ -30,11 +30,14 @@ typedef struct {
  */
 PeakScalingParameters analysis_scale_by_peaks(list(Trial)* lTrials, int ncols,
 		int reject_nonstandardly_patterned_peaks);
-
+/**
+ * Scales the given trial with the peaks it has in the consistent columns provided
+ */
+void analysis_scale_trial_by_peaks(Trial* tr, list(int)* consistent_cols);
 /**
  * Coerces peaks for the given trial into the standard signature shown.
  */
-int analysis_coerce_peaks_for_single_trial(Trial* tr, int col,
+int analysis_coerce_peaks_for_single_column(Trial* tr, int col,
 list(Peak)* standard, int reject_nonstandardly_patterned_peaks);
 
 #endif /* ANALYSIS_SEGMENTATION_H_ */
